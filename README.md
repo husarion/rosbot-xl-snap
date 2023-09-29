@@ -57,10 +57,12 @@ snap set rosbot-xl mecanum=True
 The snap ships a daemon which is automatically started once the snap is installed and configured.
 Therefore, there is nothing else to do than to start using your rosbot-xl.
 
-Note that this snap is part of an integrated snaps deployment.
-Other recommended snaps to be installed are,
-
-- [micro-xrce-dds-agent](LINK)
-- [sllidar-ros2](https://snapcraft.io/sllidar-ros2)
-- [rosbot-xl-teleop](https://snapcraft.io/rosbot-xl-teleop)
-- [rosbot-xl-nav](https://snapcraft.io/rosbot-xl-nav)
+> **Note**
+> This snap is part of an integrated snaps deployment.
+> 
+> Other recommended snaps to be installed are,
+> 
+> - [micro-xrce-dds-agent](LINK)
+> - [sllidar-ros2](https://snapcraft.io/sllidar-ros2)
+> - [rosbot-xl-teleop](https://snapcraft.io/rosbot-xl-teleop)
+> - [rosbot-xl-nav](https://snapcraft.io/rosbot-xl-nav)
