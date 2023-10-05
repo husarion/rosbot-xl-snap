@@ -1,33 +1,20 @@
 #!/bin/sh -e
 
-# Make sure parameter value is a boolean
-MECANUM="$(snapctl get mecanum)"
-if [ -n "${MECANUM}" ]; then
-  case "${MECANUM}" in
-    "true") ;;
-    "false") ;;
-    "0") ;;
-    "1") ;;
-    *)
-    	>&2 echo "'${MECANUM}' is not a supported value for 'mecanum'." \
-        "Possible values are true, false, 0, 1"
-    	return 1
-    	;;
-  esac
-fi
-
-# Make sure parameter value is a boolean
-CAMERA_MOUNT="$(snapctl get include-camera-mount)"
-if [ -n "${CAMERA_MOUNT}" ]; then
-  case "${CAMERA_MOUNT}" in
-    "true") ;;
-    "false") ;;
-    "0") ;;
-    "1") ;;
-    *)
-    	>&2 echo "'${CAMERA_MOUNT}' is not a supported value for 'include-camera-mount'." \
-        "Possible values are true, false, 0, 1"
-    	return 1
-    	;;
-  esac
-fi
+# Make sure parameters value is a boolean
+OPTS="mecanum include-camera-mount"
+for OPT in ${OPTS}; do
+  VALUE="$(snapctl get ${OPT})"
+  if [ -n "${VALUE}" ]; then
+    case "${VALUE}" in
+      "True") ;;
+      "False") ;;
+      *)
+        >&2 echo "'${VALUE}' is not a supported value for '${OPT}'." \
+          "Possible values are True or False."
+          logger -t ${SNAP_NAME} "'${VALUE}' is not a supported value for ${OPT}." \
+          "Possible values are True or False."
+        exit 1
+        ;;
+    esac
+  fi
+done
