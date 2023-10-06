@@ -1,0 +1,68 @@
+name: rosbot-xl
+adopt-info: rosbot-xl
+license: Apache-2.0
+summary: The rosbot-xl
+description: |
+  The rosbot-xl snap contains all the necessary software to bring the robot up
+  such as controller, robot state publisher etc.
+
+  It offers the following parameters,
+
+  - mecanum
+  - include-camera-mount
+  - camera-model
+  - lidar-model
+
+  which can be set as follows, e.g.,
+
+    snap set rosbot-xl mecanum=True
+
+grade: stable
+confinement: strict
+base: core22
+
+contact: https://github.com/husarion/rosbot-xl-snap/issues
+issues: https://github.com/husarion/rosbot-xl-snap/issues
+website: https://husarion.com/
+
+architectures:
+  - build-on: amd64
+  - build-on: arm64
+
+apps:
+  rosbot-xl:
+    command: usr/bin/launcher.sh
+    daemon: simple
+    install-mode: disable
+    plugs: [network, network-bind]
+    extensions: [ros2-humble-ros-base]
+
+parts:
+  rosbot-xl:
+    plugin: colcon
+    source: https://github.com/husarion/rosbot_xl_ros.git
+    build-packages: [python3-vcstool]
+    override-pull: |
+
+      craftctl default
+
+      vcs import $CRAFT_PART_SRC < $CRAFT_PART_SRC/rosbot_xl/rosbot_xl_hardware.repos
+
+      # Ignore so that rosdep doesn't pull deps
+      # and colcon doesn't build
+      touch $CRAFT_PART_SRC/rosbot_xl_gazebo/COLCON_IGNORE
+
+      # Set the snap version from the git tag
+      # The grade is set to 'stable' if the latest entry in the git history
+      # is the tag itself, otherwise set to devel
+      version="$(git describe --always --tags| sed -e 's/^v//;s/-/+git/;y/-/./')"
+      [ -n "$(echo $version | grep "+git")" ] && grade=devel || grade=stable
+      craftctl set version="$version"
+      craftctl set grade="$grade"
+
+  # copy local scripts to the snap usr/bin
+  local-files:
+    plugin: dump
+    source: snap/local/
+    organize:
+      '*.sh': usr/bin/

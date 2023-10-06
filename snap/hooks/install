@@ -1,0 +1,13 @@
+#!/bin/sh -e
+
+# Parameters are 'unset'.
+# Default configuration values is left to the launch file.
+snapctl set mecanum!
+snapctl set include-camera-mount!
+snapctl set camera-model!
+snapctl set lidar-model!
+
+if ! snapctl is-connected ros-humble; then
+  logger -t ${SNAP_NAME} "Plug 'ros-humble' isn't connected, \
+    please run: snap connect ${SNAP_NAME}:ros-humble <providing-snap>"
+fi
