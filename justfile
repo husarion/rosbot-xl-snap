@@ -1,7 +1,7 @@
 dev-build:
     #!/bin/bash
     export SNAPCRAFT_ENABLE_EXPERIMENTAL_EXTENSIONS=1
-    snapcraft
+    snapcraft --debug
 
 dev-clean:
     #!/bin/bash
@@ -77,9 +77,6 @@ install-snap:
 
 install-snapcraft:
     #!/bin/bash
-    sudo snap install lxd
-    sudo lxd init --minimal
-    sudo snap install snapcraft --classic
     # fixing issues with networking (https://documentation.ubuntu.com/lxd/en/latest/howto/network_bridge_firewalld/?_ga=2.178752743.25601779.1705486119-1059592906.1705486119#prevent-connectivity-issues-with-lxd-and-docker)
     sudo bash -c 'echo "net.ipv4.conf.all.forwarding=1" > /etc/sysctl.d/99-forwarding.conf'
     sudo systemctl stop docker.service
@@ -87,9 +84,17 @@ install-snapcraft:
     sudo systemctl restart systemd-sysctl
     # now you may need to reboot (after reboot docker will not work until you run `sudo systemctl start docker.service`)
 
+    sudo snap install lxd
+    sudo lxd init --minimal
+    sudo snap install snapcraft --classic
+
     # Enable the hotplug feature and restart the `snapd` daemon (for serial interface):
     sudo snap set core experimental.hotplug=true
     sudo systemctl restart snapd
+
+    sudo usermod -aG lxd $USER
+    newgrp lxd
+
 
 enable-docker:
     #!/bin/bash
