@@ -59,7 +59,7 @@ parts:
       - python3-vcstool
     stage-packages: 
       - stm32flash
-      # - libusb-1.0-0
+      - libusb-1.0-0
       - usbutils
     override-pull: |
       craftctl default
