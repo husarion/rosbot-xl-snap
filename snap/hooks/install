@@ -6,6 +6,7 @@ snapctl set mecanum!
 snapctl set include-camera-mount!
 snapctl set camera-model!
 snapctl set lidar-model!
+snapctl set serial-port="/dev/ttyUSBDB"
 
 if ! snapctl is-connected ros-humble; then
   logger -t ${SNAP_NAME} "Plug 'ros-humble' isn't connected, \

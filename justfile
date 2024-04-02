@@ -1,7 +1,18 @@
 dev-build:
     #!/bin/bash
     export SNAPCRAFT_ENABLE_EXPERIMENTAL_EXTENSIONS=1
-    snapcraft --debug
+    sudo /bin/bash -c "echo "net.ipv4.conf.all.forwarding=1" > /etc/sysctl.d/99-forwarding.conf"
+    sudo systemctl stop docker.service
+    sudo systemctl stop docker.socket
+    sudo systemctl restart systemd-sysctl
+
+    sudo iptables -I DOCKER-USER -i lxdbr0 -j ACCEPT
+    sudo iptables -I DOCKER-USER -o lxdbr0 -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+    # sudo lxd init --minimal
+    # sudo usermod -aG lxd $USER
+    # newgrp lxd
+    # snapcraft --debug
+    snapcraft
 
 dev-clean:
     #!/bin/bash
@@ -22,8 +33,8 @@ _install-rsync:
 dev-install:
     #!/bin/bash
     if ls rosbot-xl_*.snap 1> /dev/null 2>&1; then
-        sudo snap remove --purge rosbot
-        sudo snap install ./rosbot_*.snap --dangerous
+        sudo snap remove --purge rosbot-xl
+        sudo snap install ./rosbot-xl_*.snap --dangerous
     else
         echo "No snap found in current directory. Build it at first (run: just build)"
         exit 1
@@ -31,12 +42,17 @@ dev-install:
 
 dev-launch:
     #!/bin/bash
-    export SERIAL_PORT=/dev/ttyUSB0
-    export SERIAL_PORT_SLOT=$(snap interface serial-port | yq .slots[0] | sed 's/^\([^ ]*\) .*/\1/')
+    export SERIAL_PORT=/dev/ttyUSBDB
+    # export SERIAL_PORT_SLOT=$(snap interface serial-port | yq .slots[0] | sed 's/^\([^ ]*\) .*/\1/')
+    export SERIAL_PORT_SLOT="snapd:ft230xbasicuart"
     
     sudo snap set rosbot-xl serial-port=$SERIAL_PORT 
     sudo snap connect rosbot-xl:serial-port $SERIAL_PORT_SLOT
     sudo snap connect rosbot:ros-humble ros-humble-ros-base
+    sudo snap start rosbot-xl
+    # sudo snap logs rosbot-xl
+    # sudo snap stop rosbot-xl
+    # sudo snap restart rosbot-xl
 
 stop:
     #!/bin/bash

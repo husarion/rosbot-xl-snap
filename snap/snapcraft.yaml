@@ -28,9 +28,8 @@ website: https://husarion.com/
 architectures:
   - build-on: amd64
     build-for: amd64
-  - build-on: amd64
-    build-for: arm64
-
+  # - build-on: amd64
+  #   build-for: arm64
 apps:
   rosbot-xl:
     command: usr/bin/launcher.sh
@@ -40,6 +39,15 @@ apps:
       - network
       - network-bind
       - serial-port
+      - raw-usb
+    extensions:
+      - ros2-humble-ros-base
+  
+  flash:
+    command: usr/bin/flash.sh
+    plugs: 
+      - serial-port
+      - raw-usb
     extensions:
       - ros2-humble-ros-base
 
@@ -51,8 +59,9 @@ parts:
       - python3-vcstool
     stage-packages: 
       - stm32flash
+      # - libusb-1.0-0
+      - usbutils
     override-pull: |
-
       craftctl default
 
       vcs import $CRAFT_PART_SRC < $CRAFT_PART_SRC/rosbot_xl/rosbot_xl_hardware.repos
@@ -71,6 +80,14 @@ parts:
       [ -n "$(echo $version | grep "+git")" ] && grade=devel || grade=stable
       craftctl set version="$version"
       craftctl set grade="$grade"
+
+  pip3-dependencies:
+    plugin: python
+    source: .
+    build-packages:
+      - python3-pip
+    python-packages:
+      - pyftdi
 
   # copy local scripts to the snap usr/bin
   local-files:
