@@ -34,7 +34,6 @@ architectures:
 plugs:
   shm-plug:
     interface: system-files
-    allow-auto-connection: true
     write:
       - /dev/shm
 
