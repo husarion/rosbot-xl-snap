@@ -52,6 +52,75 @@ which can be set as follows, e.g.,
 snap set rosbot-xl mecanum=True
 ```
 
+To start the ROSbot XL daemon:
+
+```bash
+sudo snap start --enable rosbot-xl
+```
+
+### DDS Transport
+
+The snap works with the following DDS configurations: `udp` (default) and `shm` (shared memory).
+
+```bash
+sudo snap set rosbot-xl transport=shm
+# sudo snap set rosbot-xl transport=udp --default
+sudo snap restart rosbot-xl
+```
+
+Shared memory communication is possible only between the instances of ROS 2 nodes launched by the same user. Because the `rosbot-xl` snap daemon runs as `root` to allow the host <> snap communication you need to:
+
+1. Create `/usr/local/etc/shm-only.xml` file:
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<profiles xmlns="http://www.eprosima.com/XMLSchemas/fastRTPS_Profiles">
+    <transport_descriptors>
+        <transport_descriptor>
+            <transport_id>shm_transport</transport_id>
+            <type>SHM</type>
+        </transport_descriptor>
+    </transport_descriptors>
+
+    <participant profile_name="SHMParticipant" is_default_profile="true">
+        <rtps>
+            <userTransports>
+                <transport_id>shm_transport</transport_id>
+            </userTransports>
+            <useBuiltinTransports>false</useBuiltinTransports>
+        </rtps>
+    </participant>
+</profiles>
+```
+
+2. Run:
+
+```bash
+sudo su
+source /opt/ros/humble/setup.bash
+export FASTRTPS_DEFAULT_PROFILES_FILE=/usr/local/etc/shm-only.xml
+```
+
+and now you should be able to list ROSbot XL ROS 2 topics with:
+
+```bash
+ros2 topic list
+```
+
+### Logs
+
+To display logs from the ROS 2 node:
+
+```bash
+sudo snap logs rosbot-xl
+```
+
+To display logs from a snap logger
+
+```bash
+journalctl -t rosbot-xl
+```
+
 ## Use
 
 The snap ships a daemon which is automatically started once the snap is installed and configured.
