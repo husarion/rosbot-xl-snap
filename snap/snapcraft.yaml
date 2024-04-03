@@ -30,6 +30,14 @@ architectures:
     build-for: amd64
   # - build-on: amd64
   #   build-for: arm64
+
+plugs:
+  shm-plug:
+    interface: system-files
+    allow-auto-connection: true
+    write:
+      - /dev/shm
+
 apps:
   rosbot-xl:
     command: usr/bin/launcher.sh
@@ -38,8 +46,7 @@ apps:
     plugs: 
       - network
       - network-bind
-      - serial-port
-      - raw-usb
+      - shm-plug
     extensions:
       - ros2-humble-ros-base
   
@@ -48,6 +55,10 @@ apps:
     plugs: 
       - serial-port
       - raw-usb
+      # - hardware-observe
+      # - system-observe
+      # - network-control
+      - network-bind
     extensions:
       - ros2-humble-ros-base
 
@@ -95,3 +106,5 @@ parts:
     source: snap/local/
     organize:
       '*.sh': usr/bin/
+      '*.yaml': usr/share/rosbot-xl/config/
+      '*.xml': usr/share/rosbot-xl/config/

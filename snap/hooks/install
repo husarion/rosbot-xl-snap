@@ -7,8 +7,18 @@ snapctl set include-camera-mount!
 snapctl set camera-model!
 snapctl set lidar-model!
 snapctl set serial-port="/dev/ttyUSBDB"
+snapctl set transport="udp"
+snapctl set ros-localhost-only=0
 
-if ! snapctl is-connected ros-humble; then
-  logger -t ${SNAP_NAME} "Plug 'ros-humble' isn't connected, \
-    please run: snap connect ${SNAP_NAME}:ros-humble <providing-snap>"
+if ! snapctl is-connected ros-humble-ros-base; then
+  logger -t ${SNAP_NAME} "Plug 'ros-humble-ros-base' isn't connected, \
+    please run: snap connect ${SNAP_NAME}:ros-humble-ros-base ros-humble-ros-base:ros-humble-ros-base"
 fi
+
+if ! snapctl is-connected shm-plug; then
+  logger -t ${SNAP_NAME} "Plug 'shm-plug' isn't connected, \
+    please run: snap connect ${SNAP_NAME}:shm-plug"
+fi
+
+logger -t ${SNAP_NAME} "to start the ROSbot XL service, \
+  please run: snap start ${SNAP_NAME}"

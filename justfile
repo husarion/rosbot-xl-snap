@@ -49,7 +49,7 @@ dev-launch:
     sudo snap set rosbot-xl serial-port=$SERIAL_PORT 
     sudo snap connect rosbot-xl:serial-port $SERIAL_PORT_SLOT
     sudo snap connect rosbot:ros-humble ros-humble-ros-base
-    sudo snap start rosbot-xl
+    sudo snap start --enable rosbot-xl # with --enable it will start after reboot
     # sudo snap logs rosbot-xl
     # sudo snap stop rosbot-xl
     # sudo snap restart rosbot-xl
