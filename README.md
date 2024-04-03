@@ -21,11 +21,14 @@ you may have to manually connect the snap interface.
 You can verify that with the following command,
 
 ```bash
-$ snap connections rosbot-xl
-Interface            Plug                    Slot                            Notes
-content[ros-humble]  rosbot-xl:ros-humble    ros-humble-ros-base:ros-humble  manual
-network              rosbot-xl:network       :network                        -
-network-bind         rosbot-xl:network-bind  :network-bind                   -
+# snap connections rosbot-xl
+Interface                     Plug                           Slot                                     Notes
+content[ros-humble-ros-base]  rosbot-xl:ros-humble-ros-base  ros-humble-ros-base:ros-humble-ros-base  -
+network                       rosbot-xl:network              :network                                 -
+network-bind                  rosbot-xl:network-bind         :network-bind                            -
+raw-usb                       rosbot-xl:raw-usb              -                                        -
+serial-port                   rosbot-xl:serial-port          -                                        -
+system-files                  rosbot-xl:shm-plug             :system-files                            manual
 ```
 
 The interface `ros-humble` must be connected.
