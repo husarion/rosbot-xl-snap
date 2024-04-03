@@ -27,30 +27,62 @@ website: https://husarion.com/
 
 architectures:
   - build-on: amd64
-  - build-on: arm64
+    build-for: amd64
+  # - build-on: amd64
+  #   build-for: arm64
+
+plugs:
+  shm-plug:
+    interface: system-files
+    allow-auto-connection: true
+    write:
+      - /dev/shm
 
 apps:
   rosbot-xl:
     command: usr/bin/launcher.sh
     daemon: simple
     install-mode: disable
-    plugs: [network, network-bind]
-    extensions: [ros2-humble-ros-base]
+    plugs: 
+      - network
+      - network-bind
+      - shm-plug
+    extensions:
+      - ros2-humble-ros-base
+  
+  flash:
+    command: usr/bin/flash.sh
+    plugs: 
+      - serial-port
+      - raw-usb
+      # - hardware-observe
+      # - system-observe
+      # - network-control
+      - network-bind
+    extensions:
+      - ros2-humble-ros-base
 
 parts:
   rosbot-xl:
     plugin: colcon
     source: https://github.com/husarion/rosbot_xl_ros.git
-    build-packages: [python3-vcstool]
+    build-packages: 
+      - python3-vcstool
+    stage-packages: 
+      - stm32flash
+      - libusb-1.0-0
+      - usbutils
     override-pull: |
-
       craftctl default
 
       vcs import $CRAFT_PART_SRC < $CRAFT_PART_SRC/rosbot_xl/rosbot_xl_hardware.repos
-
+      cp -r $CRAFT_PART_SRC/ros2_controllers/diff_drive_controller $CRAFT_PART_SRC/
+      cp -r $CRAFT_PART_SRC/ros2_controllers/imu_sensor_broadcaster $CRAFT_PART_SRC/
+      rm -rf $CRAFT_PART_SRC/ros2_controllers
+      rm -r $CRAFT_PART_SRC/rosbot_xl_gazebo
       # Ignore so that rosdep doesn't pull deps
       # and colcon doesn't build
-      touch $CRAFT_PART_SRC/rosbot_xl_gazebo/COLCON_IGNORE
+      # touch $CRAFT_PART_SRC/rosbot_xl_gazebo/COLCON_IGNORE
 
       # Set the snap version from the git tag
       # The grade is set to 'stable' if the latest entry in the git history
@@ -60,9 +92,19 @@ parts:
       craftctl set version="$version"
       craftctl set grade="$grade"
 
+  pip3-dependencies:
+    plugin: python
+    source: .
+    build-packages:
+      - python3-pip
+    python-packages:
+      - pyftdi
+
   # copy local scripts to the snap usr/bin
   local-files:
     plugin: dump
     source: snap/local/
     organize:
       '*.sh': usr/bin/
+      '*.yaml': usr/share/rosbot-xl/config/
+      '*.xml': usr/share/rosbot-xl/config/
