@@ -17,7 +17,7 @@ fi
 
 if ! snapctl is-connected shm-plug; then
   logger -t ${SNAP_NAME} "Plug 'shm-plug' isn't connected, \
-    please run: snap connect ${SNAP_NAME}:shm-plug"
+    please run: snap connect ${SNAP_NAME}:shm-plug ${SNAP_NAME}:shm-slot"
 fi
 
 logger -t ${SNAP_NAME} "to start the ROSbot XL service, \
