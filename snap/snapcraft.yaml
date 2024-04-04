@@ -31,11 +31,16 @@ architectures:
   # - build-on: amd64
   #   build-for: arm64
 
+slots:
+  shm-slot:
+    interface: shared-memory
+    write: ['*'] # paths are relative to /dev/shm
+    private: false
 plugs:
   shm-plug:
-    interface: system-files
-    write:
-      - /dev/shm
+    interface: shared-memory
+    shared-memory: shmem-slot
+    private: false
 
 apps:
   rosbot-xl:
@@ -46,6 +51,8 @@ apps:
       - network
       - network-bind
       - shm-plug
+    slots:
+      - shm-slot
     extensions:
       - ros2-humble-ros-base
   
