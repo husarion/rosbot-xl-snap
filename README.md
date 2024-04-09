@@ -124,6 +124,26 @@ To display logs from a snap logger
 journalctl -t rosbot-xl
 ```
 
+### Flashing
+
+List available serial interfaces:
+
+```bash
+$ snap interface serial-port
+name:    serial-port
+summary: allows accessing a specific serial port
+plugs:
+  - rosbot-xl
+slots:
+  - snapd:ft230xbasicuart (allows accessing a specific serial port)
+```
+
+```bash
+sudo snap connect rosbot-xl:raw-usb
+sudo snap connect rosbot-xl:serial-port :ft230xbasicuart
+sudo rosbot-xl.flash
+```
+
 ## Use
 
 The snap ships a daemon which is automatically started once the snap is installed and configured.
