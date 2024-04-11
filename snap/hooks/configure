@@ -1,5 +1,10 @@
 #!/bin/sh -e
 
+# The configure hook is called every time one the following actions happen:
+# - initial snap installation
+# - snap refresh
+# - whenever the user runs snap set|unset to change a configuration option
+
 # Make sure parameters value is a boolean
 OPTS="mecanum include-camera-mount"
 for OPT in ${OPTS}; do
@@ -11,10 +16,42 @@ for OPT in ${OPTS}; do
       *)
         >&2 echo "'${VALUE}' is not a supported value for '${OPT}'." \
           "Possible values are True or False."
-          logger -t ${SNAP_NAME} "'${VALUE}' is not a supported value for ${OPT}." \
+          logger -t ${SNAP_NAME} "configure hook: '${VALUE}' is not a supported value for ${OPT}." \
           "Possible values are True or False."
         exit 1
         ;;
     esac
   fi
 done
+
+# Get the transport setting
+transport_setting=$(snapctl get transport)
+logger -t ${SNAP_NAME} "configure hook: transport=${transport_setting}."
+
+# Initialize a flag to determine if a restart is needed
+restart_needed=0
+
+# Check if the transport setting is "shm" and if shm-plug is connected
+if [ "$transport_setting" = "shm" ]; then
+  if snapctl is-connected shm-plug; then
+    restart_needed=1
+  fi
+# Check if the transport setting is "udp"
+elif [ "$transport_setting" = "udp" ]; then
+  restart_needed=1
+fi
+
+# Proceed with restart if needed
+if [ "$restart_needed" -eq 1 ]; then
+  # Check if the service is already started
+  if snapctl services ${SNAP_NAME}.${SNAP_NAME} | grep -qw active; then
+    # Restart the service
+    snapctl restart ${SNAP_NAME}.${SNAP_NAME}
+    logger -t ${SNAP_NAME} "configure hook: Service restarted."
+  else
+    logger -t ${SNAP_NAME} "configure hook: Service ${SNAP_NAME}.${SNAP_NAME} is not active, no restart needed."
+  fi
+else
+  logger -t ${SNAP_NAME} "configure hook: no restart needed."
+fi
+

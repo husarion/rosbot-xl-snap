@@ -41,7 +41,7 @@ slots:
 plugs:
   shm-plug:
     interface: shared-memory
-    shared-memory: shmem-slot
+    shared-memory: shm-slot
     private: false
 
 apps:

@@ -34,6 +34,18 @@ dev-install:
     #!/bin/bash
     if ls rosbot-xl_*.snap 1> /dev/null 2>&1; then
         sudo snap remove --purge rosbot-xl
+        sudo rm -rf ./squashfs-root
+        unsquashfs ./rosbot-xl_*.snap
+        sudo snap try squashfs-root
+    else
+        echo "No snap found in current directory. Build it at first (run: just build)"
+        exit 1
+    fi
+
+install:
+    #!/bin/bash
+    if ls rosbot-xl_*.snap 1> /dev/null 2>&1; then
+        sudo snap remove --purge rosbot-xl
         sudo snap install ./rosbot-xl_*.snap --dangerous
     else
         echo "No snap found in current directory. Build it at first (run: just build)"
@@ -70,10 +82,16 @@ logs:
 # copy repo content to remote host with 'rsync' and watch for changes
 sync hostname password="husarion": _install-rsync
     #!/bin/bash
-    sshpass -p "husarion" rsync -vRr --delete ./ husarion@{{hostname}}:/home/husarion/${PWD##*/}
+    sshpass -p "husarion" rsync -vRr ./ husarion@{{hostname}}:/home/husarion/${PWD##*/}
     while inotifywait -r -e modify,create,delete,move ./ ; do
-        sshpass -p "{{password}}" rsync -vRr --delete ./ husarion@{{hostname}}:/home/husarion/${PWD##*/}
+        sshpass -p "{{password}}" rsync -vRr ./ husarion@{{hostname}}:/home/husarion/${PWD##*/}
     done
+
+    # sshpass -p "husarion" rsync -vRr --delete ./ husarion@{{hostname}}:/home/husarion/${PWD##*/}
+    # while inotifywait -r -e modify,create,delete,move ./ ; do
+    #     sshpass -p "{{password}}" rsync -vRr --delete ./ husarion@{{hostname}}:/home/husarion/${PWD##*/}
+    # done
+
 
 install-snap:
     #!/bin/bash
