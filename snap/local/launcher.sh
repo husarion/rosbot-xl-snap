@@ -30,6 +30,11 @@ case "$TRANSPORT" in
         export FASTRTPS_DEFAULT_PROFILES_FILE=$SNAP/usr/share/rosbot-xl/config/shm-only.xml
         logger -t ${SNAP_NAME} "$(cat $FASTRTPS_DEFAULT_PROFILES_FILE)"
         ;;
+    udp)
+        export FASTRTPS_DEFAULT_PROFILES_FILE=$SNAP/usr/share/rosbot-xl/config/udp-only.xml
+        logger -t ${SNAP_NAME} "$(cat $FASTRTPS_DEFAULT_PROFILES_FILE)"
+        # logger -t ${SNAP_NAME} "ROS_LOCAHOST_ONLY=${ROS_LOCAHOST_ONLY}"
+        ;;
     *)
         logger -t ${SNAP_NAME} "ROS_LOCAHOST_ONLY=${ROS_LOCAHOST_ONLY}"
         ;;

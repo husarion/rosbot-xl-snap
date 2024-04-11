@@ -31,13 +31,17 @@ logger -t ${SNAP_NAME} "configure hook: transport=${transport_setting}."
 # Initialize a flag to determine if a restart is needed
 restart_needed=0
 
+# shm - works only if FASTRTPS_DEFAULT_PROFILES_FILE=$SNAP/usr/share/rosbot-xl/config/shm-only.xml on root (only root) user at host OS
+# udp - works if shm interface is connected & host has default settings (normal user or host)
+# builtin - works if shm interface is not connected in the snap (udp connection is used)
+
 # Check if the transport setting is "shm" and if shm-plug is connected
 if [ "$transport_setting" = "shm" ]; then
   if snapctl is-connected shm-plug; then
     restart_needed=1
   fi
 # Check if the transport setting is "udp"
-elif [ "$transport_setting" = "udp" ]; then
+elif [ "$transport_setting" = "udp" ] || [ "$transport_setting" = "builtin" ]; then
   restart_needed=1
 fi
 

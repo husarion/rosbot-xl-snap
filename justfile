@@ -76,8 +76,8 @@ info:
     sudo snap connections rosbot-xl
 
 logs:
-    #!/bin/bash
     sudo snap logs rosbot-xl -n 20
+    journalctl -t rosbot-xl
 
 # copy repo content to remote host with 'rsync' and watch for changes
 sync hostname password="husarion": _install-rsync
