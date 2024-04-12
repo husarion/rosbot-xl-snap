@@ -20,7 +20,6 @@ if [ ${LAUNCH_OPTIONS} ]; then
 fi
 
 TRANSPORT="$(snapctl get transport)"
-export ROS_LOCAHOST_ONLY="$(snapctl get ros-localhost-only)"
 
 # watch the log with: "journalctl -t rosbot-xl"
 logger -t ${SNAP_NAME} "transport: ${TRANSPORT}"
@@ -33,11 +32,14 @@ case "$TRANSPORT" in
     udp)
         export FASTRTPS_DEFAULT_PROFILES_FILE=$SNAP/usr/share/rosbot-xl/config/udp-only.xml
         logger -t ${SNAP_NAME} "$(cat $FASTRTPS_DEFAULT_PROFILES_FILE)"
-        # logger -t ${SNAP_NAME} "ROS_LOCAHOST_ONLY=${ROS_LOCAHOST_ONLY}"
         ;;
     *)
-        logger -t ${SNAP_NAME} "ROS_LOCAHOST_ONLY=${ROS_LOCAHOST_ONLY}"
+        # logger -t ${SNAP_NAME} "ROS_LOCAHOST_ONLY=${ROS_LOCALHOST_ONLY}"
         ;;
 esac
+
+export ROS_LOCALHOST_ONLY="$(snapctl get ros-localhost-only)"
+logger -t ${SNAP_NAME} "ROS_LOCAHOST_ONLY=${ROS_LOCALHOST_ONLY}"
+# logger -t ${SNAP_NAME} "$(printenv)"
 
 ros2 launch rosbot_xl_bringup combined.launch.py ${LAUNCH_OPTIONS}

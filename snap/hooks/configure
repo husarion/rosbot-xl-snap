@@ -11,51 +11,70 @@ for OPT in ${OPTS}; do
   VALUE="$(snapctl get ${OPT})"
   if [ -n "${VALUE}" ]; then
     case "${VALUE}" in
-      "True") ;;
-      "False") ;;
-      *)
-        >&2 echo "'${VALUE}' is not a supported value for '${OPT}'." \
-          "Possible values are True or False."
-          logger -t ${SNAP_NAME} "configure hook: '${VALUE}' is not a supported value for ${OPT}." \
-          "Possible values are True or False."
-        exit 1
-        ;;
+    "True") ;;
+    "False") ;;
+    *)
+      echo >&2 "'${VALUE}' is not a supported value for '${OPT}'." \
+        "Possible values are True or False."
+      logger -t ${SNAP_NAME} "configure hook: '${VALUE}' is not a supported value for ${OPT}." \
+        "Possible values are True or False."
+      exit 1
+      ;;
     esac
   fi
 done
 
-# Get the transport setting
+# Get the transport setting using snapctl
 transport_setting=$(snapctl get transport)
-logger -t ${SNAP_NAME} "configure hook: transport=${transport_setting}."
 
-# Initialize a flag to determine if a restart is needed
-restart_needed=0
+# Define the names of the daemons using SNAP_NAME
+udp_daemon="${SNAP_NAME}.udp-daemon"
+shm_daemon="${SNAP_NAME}.shm-daemon"
 
-# shm - works only if FASTRTPS_DEFAULT_PROFILES_FILE=$SNAP/usr/share/rosbot-xl/config/shm-only.xml on root (only root) user at host OS
-# udp - works if shm interface is connected & host has default settings (normal user or host)
-# builtin - works if shm interface is not connected in the snap (udp connection is used)
-
-# Check if the transport setting is "shm" and if shm-plug is connected
-if [ "$transport_setting" = "shm" ]; then
-  if snapctl is-connected shm-plug; then
-    restart_needed=1
+# Check the transport setting and act accordingly
+if [ "$transport_setting" = "udp" ]; then
+  # Stop the SHM daemon if it is running
+  if snapctl services $shm_daemon | grep -qw active; then
+    snapctl stop $shm_daemon --disable
+    logger -t "${SNAP_NAME}" "Stopped $shm_daemon with --disable"
   fi
-# Check if the transport setting is "udp"
-elif [ "$transport_setting" = "udp" ] || [ "$transport_setting" = "builtin" ]; then
-  restart_needed=1
-fi
 
-# Proceed with restart if needed
-if [ "$restart_needed" -eq 1 ]; then
-  # Check if the service is already started
-  if snapctl services ${SNAP_NAME}.${SNAP_NAME} | grep -qw active; then
-    # Restart the service
-    snapctl restart ${SNAP_NAME}.${SNAP_NAME}
-    logger -t ${SNAP_NAME} "configure hook: Service restarted."
+  # Check if the UDP daemon is already running
+  if snapctl services $udp_daemon | grep -qw active; then
+    # Restart the daemon if it is already running
+    snapctl restart $udp_daemon
+    logger -t "${SNAP_NAME}" "Restarted $udp_daemon with --enable"
   else
-    logger -t ${SNAP_NAME} "configure hook: Service ${SNAP_NAME}.${SNAP_NAME} is not active, no restart needed."
+    # Start the UDP daemon if it is not running
+    snapctl start $udp_daemon --enable
+    logger -t "${SNAP_NAME}" "Started $udp_daemon with --enable"
+  fi
+elif [ "$transport_setting" = "builtin" ] || [ "$transport_setting" = "shm" ]; then
+  if snapctl is-connected shm-plug; then
+    # Stop the UDP daemon if it is running
+    if snapctl services $udp_daemon | grep -qw active; then
+      snapctl stop $udp_daemon --disable
+      logger -t "${SNAP_NAME}" "Stopped $udp_daemon with --disable"
+    fi
+
+    # Check if the SHM daemon is already running
+    if snapctl services $shm_daemon | grep -qw active; then
+      # Restart the daemon if it is already running
+      snapctl restart $shm_daemon
+      logger -t "${SNAP_NAME}" "Restarted $shm_daemon with --enable"
+    else
+      # Start the SHM daemon if it is not running
+      snapctl start $shm_daemon --enable
+      logger -t "${SNAP_NAME}" "Started $shm_daemon with --enable"
+    fi
+  else
+    snapctl stop $udp_daemon --disable
+    snapctl stop $shm_daemon --disable
+    logger -t ${SNAP_NAME} "to use builtin and shm tranport shm-plug need to be connected. Run:"
+    logger -t ${SNAP_NAME} "sudo snap connect ${SNAP_NAME}:shm-plug ${SNAP_NAME}:shm-slot"
+    exit 1
   fi
 else
-  logger -t ${SNAP_NAME} "configure hook: no restart needed."
+  # Log the invalid setting
+  logger -t "${SNAP_NAME}" "Invalid transport setting: $transport_setting"
 fi
-
