@@ -24,57 +24,63 @@ for OPT in ${OPTS}; do
   fi
 done
 
-# Get the transport setting using snapctl
-transport_setting=$(snapctl get transport)
+if snapctl is-connected ros-humble-ros-base; then
 
-# Define the names of the daemons using SNAP_NAME
-udp_daemon="${SNAP_NAME}.udp-daemon"
-shm_daemon="${SNAP_NAME}.shm-daemon"
+  # Get the transport setting using snapctl
+  transport_setting=$(snapctl get transport)
 
-# Check the transport setting and act accordingly
-if [ "$transport_setting" = "udp" ]; then
-  # Stop the SHM daemon if it is running
-  if snapctl services $shm_daemon | grep -qw active; then
-    snapctl stop $shm_daemon --disable
-    logger -t "${SNAP_NAME}" "Stopped $shm_daemon with --disable"
-  fi
+  # Define the names of the daemons using SNAP_NAME
+  udp_daemon="${SNAP_NAME}.udp-daemon"
+  shm_daemon="${SNAP_NAME}.shm-daemon"
 
-  # Check if the UDP daemon is already running
-  if snapctl services $udp_daemon | grep -qw active; then
-    # Restart the daemon if it is already running
-    snapctl restart $udp_daemon
-    logger -t "${SNAP_NAME}" "Restarted $udp_daemon with --enable"
-  else
-    # Start the UDP daemon if it is not running
-    snapctl start $udp_daemon --enable
-    logger -t "${SNAP_NAME}" "Started $udp_daemon with --enable"
-  fi
-elif [ "$transport_setting" = "builtin" ] || [ "$transport_setting" = "shm" ]; then
-  if snapctl is-connected shm-plug; then
-    # Stop the UDP daemon if it is running
-    if snapctl services $udp_daemon | grep -qw active; then
-      snapctl stop $udp_daemon --disable
-      logger -t "${SNAP_NAME}" "Stopped $udp_daemon with --disable"
-    fi
-
-    # Check if the SHM daemon is already running
+  # Check the transport setting and act accordingly
+  if [ "$transport_setting" = "udp" ]; then
+    # Stop the SHM daemon if it is running
     if snapctl services $shm_daemon | grep -qw active; then
+      snapctl stop $shm_daemon --disable
+      logger -t "${SNAP_NAME}" "Stopped $shm_daemon with --disable"
+    fi
+
+    # Check if the UDP daemon is already running
+    if snapctl services $udp_daemon | grep -qw active; then
       # Restart the daemon if it is already running
-      snapctl restart $shm_daemon
-      logger -t "${SNAP_NAME}" "Restarted $shm_daemon with --enable"
+      snapctl restart $udp_daemon
+      logger -t "${SNAP_NAME}" "Restarted $udp_daemon"
     else
-      # Start the SHM daemon if it is not running
-      snapctl start $shm_daemon --enable
-      logger -t "${SNAP_NAME}" "Started $shm_daemon with --enable"
+      # Start the UDP daemon if it is not running
+      snapctl start $udp_daemon --enable
+      logger -t "${SNAP_NAME}" "Started $udp_daemon with --enable"
+    fi
+  elif [ "$transport_setting" = "builtin" ] || [ "$transport_setting" = "shm" ]; then
+    if snapctl is-connected shm-plug; then
+      # Stop the UDP daemon if it is running
+      if snapctl services $udp_daemon | grep -qw active; then
+        snapctl stop $udp_daemon --disable
+        logger -t "${SNAP_NAME}" "Stopped $udp_daemon with --disable"
+      fi
+
+      # Check if the SHM daemon is already running
+      if snapctl services $shm_daemon | grep -qw active; then
+        # Restart the daemon if it is already running
+        snapctl restart $shm_daemon
+        logger -t "${SNAP_NAME}" "Restarted $shm_daemon"
+      else
+        # Start the SHM daemon if it is not running
+        snapctl start $shm_daemon --enable
+        logger -t "${SNAP_NAME}" "Started $shm_daemon with --enable"
+      fi
+    else
+      snapctl stop $udp_daemon --disable
+      snapctl stop $shm_daemon --disable
+      logger -t ${SNAP_NAME} "to use builtin and shm tranport shm-plug need to be connected. Run:"
+      logger -t ${SNAP_NAME} "sudo snap connect ${SNAP_NAME}:shm-plug ${SNAP_NAME}:shm-slot"
+      exit 1
     fi
   else
-    snapctl stop $udp_daemon --disable
-    snapctl stop $shm_daemon --disable
-    logger -t ${SNAP_NAME} "to use builtin and shm tranport shm-plug need to be connected. Run:"
-    logger -t ${SNAP_NAME} "sudo snap connect ${SNAP_NAME}:shm-plug ${SNAP_NAME}:shm-slot"
-    exit 1
+    # Log the invalid setting
+    logger -t "${SNAP_NAME}" "Invalid transport setting: $transport_setting"
   fi
 else
-  # Log the invalid setting
-  logger -t "${SNAP_NAME}" "Invalid transport setting: $transport_setting"
+  logger -t ${SNAP_NAME} "Plug 'ros-humble-ros-base' isn't connected, please run:"
+  logger -t ${SNAP_NAME} "snap connect ${SNAP_NAME}:ros-humble-ros-base ros-humble-ros-base:ros-humble-ros-base"
 fi

@@ -1,0 +1,9 @@
+#!/bin/sh -e
+
+# now we can start the service
+# if snapctl services ${SNAP_NAME}.${SNAP_NAME} | grep -q inactive; then
+#   snapctl start --enable ${SNAP_NAME}.${SNAP_NAME} 2>&1 || true
+# fi
+
+logger -t ${SNAP_NAME} "Plug 'ros-humble-ros-base' connected"
+snapctl set transport=udp

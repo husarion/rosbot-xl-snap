@@ -63,7 +63,8 @@ apps:
 
   flash:
     command: usr/bin/flash.sh
-    plugs: [serial-port, raw-usb, network-bind]
+    plugs: [raw-usb, network-bind]
+    # plugs: [serial-port, raw-usb, network-bind]
     extensions: [ros2-humble-ros-base]
 
 parts:

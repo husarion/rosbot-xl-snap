@@ -1,3 +1,0 @@
-#!/bin/sh -e
-
-snapctl stop --disable ${SNAP_NAME}.${SNAP_NAME} 2>&1 || true
