@@ -64,9 +64,6 @@ apps:
   flash:
     command: usr/bin/flash.sh
     plugs: [serial-port, raw-usb, network-bind]
-      # - hardware-observe
-      # - system-observe
-      # - network-control
     extensions: [ros2-humble-ros-base]
 
 parts:
