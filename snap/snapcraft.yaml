@@ -61,6 +61,9 @@ apps:
     slots: [shm-slot]
     extensions: [ros2-humble-ros-base]
 
+  stop:
+    command: usr/bin/stop.sh
+
   flash:
     command: usr/bin/flash.sh
     plugs: [raw-usb, network-bind]
@@ -77,6 +80,7 @@ parts:
       - stm32flash
       - libusb-1.0-0
       - usbutils
+      - gosu
     override-pull: |
       craftctl default
 

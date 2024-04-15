@@ -6,9 +6,11 @@ snapctl set mecanum!
 snapctl set include-camera-mount!
 snapctl set camera-model!
 snapctl set lidar-model!
+snapctl set user="root"
 snapctl set serial-port="/dev/ttyUSBDB"
 snapctl set transport="udp"
 snapctl set ros-localhost-only=0
+snapctl set ros-domain-id=0
 snapctl set fastdds-default-profiles-file="fastdds.xml"
 
 if ! snapctl is-connected ros-humble-ros-base; then
@@ -19,4 +21,9 @@ fi
 if ! snapctl is-connected shm-plug; then
   logger -t ${SNAP_NAME} "Plug 'shm-plug' isn't connected, \
     please run: snap connect ${SNAP_NAME}:shm-plug ${SNAP_NAME}:shm-slot"
+fi
+
+if ! snapctl is-connected raw-usb; then
+  logger -t ${SNAP_NAME} "Plug 'raw-usb' isn't connected, \
+    please run: snap connect ${SNAP_NAME}:raw-usb"
 fi

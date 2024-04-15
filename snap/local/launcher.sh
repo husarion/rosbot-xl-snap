@@ -47,16 +47,13 @@ else
   builtin)
     logger -t ${SNAP_NAME} "using builtin transport"
     ;;
-  *)
-    snapctl stop ${SNAP_NAME}.udp-daemon --disable
-    snapctl stop ${SNAP_NAME}.shm-daemon --disable
-    logger -t ${SNAP_NAME} "unknown transport: $TRANSPORT. Possible values: shm, udp, builtin"
-    exit 1
-    ;;
   esac
 fi
 
 export ROS_LOCALHOST_ONLY="$(snapctl get ros-localhost-only)"
+export ROS_DOMAIN_ID="$(snapctl get ros-domain-id)"
+
 logger -t ${SNAP_NAME} "ROS_LOCAHOST_ONLY=${ROS_LOCALHOST_ONLY}"
+logger -t ${SNAP_NAME} "ROS_DOMAIN_ID=${ROS_DOMAIN_ID}"
 
 ros2 launch rosbot_xl_bringup combined.launch.py ${LAUNCH_OPTIONS}
