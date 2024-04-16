@@ -6,7 +6,6 @@ snapctl set mecanum!
 snapctl set include-camera-mount!
 snapctl set camera-model!
 snapctl set lidar-model!
-snapctl set user="root"
 snapctl set serial-port="/dev/ttyUSBDB"
 snapctl set transport="udp"
 snapctl set ros-localhost-only=0

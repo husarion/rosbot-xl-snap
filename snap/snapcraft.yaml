@@ -80,7 +80,7 @@ parts:
       - stm32flash
       - libusb-1.0-0
       - usbutils
-      - gosu
+      # - gosu
     override-pull: |
       craftctl default
 
