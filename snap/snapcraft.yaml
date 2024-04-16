@@ -30,6 +30,8 @@ architectures:
     build-for: amd64
   # - build-on: amd64
   #   build-for: arm64
+  - build-on: arm64
+    build-for: arm64
 
 slots:
   shm-slot:
@@ -39,34 +41,34 @@ slots:
 plugs:
   shm-plug:
     interface: shared-memory
-    shared-memory: shmem-slot
+    shared-memory: shm-slot
     private: false
 
 apps:
-  rosbot-xl:
+
+  udp-daemon:
     command: usr/bin/launcher.sh
     daemon: simple
     install-mode: disable
-    plugs: 
-      - network
-      - network-bind
-      - shm-plug
-    slots:
-      - shm-slot
-    extensions:
-      - ros2-humble-ros-base
-  
+    plugs: [network, network-bind]
+    extensions: [ros2-humble-ros-base]
+
+  shm-daemon:
+    command: usr/bin/launcher.sh
+    daemon: simple
+    install-mode: disable
+    plugs: [network, network-bind, shm-plug]
+    slots: [shm-slot]
+    extensions: [ros2-humble-ros-base]
+
+  stop:
+    command: usr/bin/stop.sh
+
   flash:
     command: usr/bin/flash.sh
-    plugs: 
-      - serial-port
-      - raw-usb
-      # - hardware-observe
-      # - system-observe
-      # - network-control
-      - network-bind
-    extensions:
-      - ros2-humble-ros-base
+    plugs: [raw-usb, network-bind]
+    # plugs: [serial-port, raw-usb, network-bind]
+    extensions: [ros2-humble-ros-base]
 
 parts:
   rosbot-xl:
@@ -78,6 +80,7 @@ parts:
       - stm32flash
       - libusb-1.0-0
       - usbutils
+      # - gosu
     override-pull: |
       craftctl default
 
@@ -97,6 +100,11 @@ parts:
       [ -n "$(echo $version | grep "+git")" ] && grade=devel || grade=stable
       craftctl set version="$version"
       craftctl set grade="$grade"
+
+  # apt-dependencies:
+  #   plugin: nil
+  #   stage-packages:
+  #     - ros-humble-rmw-cyclonedds-cpp
 
   pip3-dependencies:
     plugin: python

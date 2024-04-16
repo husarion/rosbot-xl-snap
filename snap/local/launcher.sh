@@ -14,25 +14,46 @@ done
 # Replace '-' with '_'
 LAUNCH_OPTIONS=$(echo ${LAUNCH_OPTIONS} | tr - _)
 
-if [ ${LAUNCH_OPTIONS} ]; then
+if [ "${LAUNCH_OPTIONS}" ]; then
   # watch the log with: "journalctl -t rosbot-xl"
   logger -t ${SNAP_NAME} "Running with options: ${LAUNCH_OPTIONS}"
 fi
 
-TRANSPORT="$(snapctl get transport)"
-export ROS_LOCAHOST_ONLY="$(snapctl get ros-localhost-only)"
+FASTDDS_FILE=$(snapctl get fastdds-default-profiles-file)
 
-# watch the log with: "journalctl -t rosbot-xl"
-logger -t ${SNAP_NAME} "transport: ${TRANSPORT}"
+if [ ! -f "${SNAP_COMMON}/${FASTDDS_FILE}" ]; then
+  # eg. /var/snap/rosbot-xl/common/fastdds.xml
+  logger -t ${SNAP_NAME} "${SNAP_COMMON}/${FASTDDS_FILE} does not exist."
+fi
 
-case "$TRANSPORT" in
-    shm)
-        export FASTRTPS_DEFAULT_PROFILES_FILE=$SNAP/usr/share/rosbot-xl/config/shm-only.xml
-        logger -t ${SNAP_NAME} "$(cat $FASTRTPS_DEFAULT_PROFILES_FILE)"
-        ;;
-    *)
-        logger -t ${SNAP_NAME} "ROS_LOCAHOST_ONLY=${ROS_LOCAHOST_ONLY}"
-        ;;
-esac
+if [ -n "${FASTDDS_FILE}" ] && [ -f "${SNAP_COMMON}/${FASTDDS_FILE}" ]; then
+  export FASTRTPS_DEFAULT_PROFILES_FILE=${SNAP_COMMON}/${FASTDDS_FILE}
+  logger -t ${SNAP_NAME} "Using FASTRTPS profile: ${FASTRTPS_DEFAULT_PROFILES_FILE}"
+  logger -t ${SNAP_NAME} "$(cat $FASTRTPS_DEFAULT_PROFILES_FILE)"
+else
+  TRANSPORT="$(snapctl get transport)"
+  # watch the log with: "journalctl -t rosbot-xl"
+  logger -t ${SNAP_NAME} "transport: ${TRANSPORT}"
+
+  case "$TRANSPORT" in
+  shm)
+    export FASTRTPS_DEFAULT_PROFILES_FILE=$SNAP/usr/share/rosbot-xl/config/shm-only.xml
+    logger -t ${SNAP_NAME} "$(cat $FASTRTPS_DEFAULT_PROFILES_FILE)"
+    ;;
+  udp)
+    export FASTRTPS_DEFAULT_PROFILES_FILE=$SNAP/usr/share/rosbot-xl/config/udp-only.xml
+    logger -t ${SNAP_NAME} "$(cat $FASTRTPS_DEFAULT_PROFILES_FILE)"
+    ;;
+  builtin)
+    logger -t ${SNAP_NAME} "using builtin transport"
+    ;;
+  esac
+fi
+
+export ROS_LOCALHOST_ONLY="$(snapctl get ros-localhost-only)"
+export ROS_DOMAIN_ID="$(snapctl get ros-domain-id)"
+
+logger -t ${SNAP_NAME} "ROS_LOCAHOST_ONLY=${ROS_LOCALHOST_ONLY}"
+logger -t ${SNAP_NAME} "ROS_DOMAIN_ID=${ROS_DOMAIN_ID}"
 
 ros2 launch rosbot_xl_bringup combined.launch.py ${LAUNCH_OPTIONS}

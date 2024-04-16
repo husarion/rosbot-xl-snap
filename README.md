@@ -26,20 +26,21 @@ Interface                     Plug                           Slot               
 content[ros-humble-ros-base]  rosbot-xl:ros-humble-ros-base  ros-humble-ros-base:ros-humble-ros-base  -
 network                       rosbot-xl:network              :network                                 -
 network-bind                  rosbot-xl:network-bind         :network-bind                            -
-raw-usb                       rosbot-xl:raw-usb              -                                        -
-serial-port                   rosbot-xl:serial-port          -                                        -
-system-files                  rosbot-xl:shm-plug             :system-files                            manual
+raw-usb                       rosbot-xl:raw-usb              :raw-usb                                 manual
+shared-memory                 rosbot-xl:shm-plug             rosbot-xl:shm-slot                       manual
 ```
 
-The interface `ros-humble` must be connected.
+The interface `ros-humble-ros-base` must be connected.
 
 If it isn't, you can issue the following command,
 
 ```bash
-snap connect rosbot-xl:ros-humble ros-humble-ros-base
+snap connect rosbot-xl:ros-humble-ros-base ros-humble-ros-base:ros-humble-ros-base
 ```
 
 ### Parameters
+
+#### ROS Driver
 
 Depending on your robot hardware,
 the snap can be configured through the following parameters:
@@ -61,14 +62,18 @@ To start the ROSbot XL daemon:
 sudo snap start --enable rosbot-xl
 ```
 
-### DDS Transport
+#### ROS envs
 
-The snap works with the following DDS configurations: `udp` (default) and `shm` (shared memory).
+To set `ROS_LOCALHOST_ONLY` and `ROS_DOMAIN_ID` envs use the following parameters:
+- ros-localhost-only
+- ros-domain-id
+
+#### DDS Transport
+
+The snap works with the following DDS configurations: `udp` (default), `shm` (shared memory) and `builtin`.
 
 ```bash
 sudo snap set rosbot-xl transport=shm
-# sudo snap set rosbot-xl transport=udp --default
-sudo snap restart rosbot-xl
 ```
 
 Shared memory communication is possible only between the instances of ROS 2 nodes launched by the same user. Because the `rosbot-xl` snap daemon runs as `root` to allow the host <> snap communication you need to:
@@ -110,7 +115,23 @@ and now you should be able to list ROSbot XL ROS 2 topics with:
 ros2 topic list
 ```
 
-### Logs
+#### DDS Transport (custom)
+
+If you want to use a custom FastDDS transport place it under the `/var/snap/rosbot-xl/common/` path (eg. `/var/snap/rosbot-xl/common/my-fastdds.xml`), and set the parameter:
+
+```bash
+sudo snap set rosbot-xl fastdds-default-profiles-file=my-fastdds.xml
+```
+
+### STM32 Firmware flashing
+
+```bash
+sudo snap connect rosbot-xl:raw-usb
+sudo snap set rosbot-xl serial-port=/dev/ttyUSB0 # /dev/ttyUSBDB default - the serial port to which the digital board is connected
+sudo rosbot-xl.flash
+```
+
+## Logs
 
 To display logs from the ROS 2 node:
 
@@ -134,7 +155,6 @@ Therefore, there is nothing else to do than to start using your rosbot-xl.
 > 
 > Other recommended snaps to be installed are,
 > 
-> - [micro-xrce-dds-agent](LINK)
 > - [sllidar-ros2](https://snapcraft.io/sllidar-ros2)
 > - [rosbot-xl-teleop](https://snapcraft.io/rosbot-xl-teleop)
 > - [rosbot-xl-nav](https://snapcraft.io/rosbot-xl-nav)
