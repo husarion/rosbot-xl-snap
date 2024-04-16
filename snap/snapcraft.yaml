@@ -37,7 +37,7 @@ slots:
   shm-slot:
     interface: shared-memory
     write: ['*'] # paths are relative to /dev/shm
-    private: false
+
 plugs:
   shm-plug:
     interface: shared-memory
