@@ -7,6 +7,7 @@ snapctl set include-camera-mount!
 snapctl set camera-model!
 snapctl set lidar-model!
 snapctl set serial-port="/dev/ttyUSBDB"
+snapctl set namespace! # unset
 snapctl set transport="udp"
 snapctl set ros-localhost-only=0
 snapctl set ros-domain-id=0

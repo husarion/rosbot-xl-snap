@@ -6,4 +6,3 @@
 # fi
 
 logger -t ${SNAP_NAME} "Plug 'ros-humble-ros-base' connected"
-snapctl set transport=udp
