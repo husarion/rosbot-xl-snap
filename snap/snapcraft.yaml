@@ -8,10 +8,16 @@ description: |
 
   It offers the following parameters,
 
+  - ros-domain-id
+  - ros-localhost-only
+  - fastdds-default-profiles-file
+  - transport
+  - namespace
   - mecanum
   - include-camera-mount
   - camera-model
   - lidar-model
+  - serial-port
 
   which can be set as follows, e.g.,
 
@@ -47,14 +53,16 @@ plugs:
 apps:
 
   udp-daemon:
-    command: usr/bin/launcher.sh
+    command: usr/bin/daemon_launcher.sh
+    command-chain: [usr/bin/ros_setup.sh]
     daemon: simple
     install-mode: disable
     plugs: [network, network-bind]
     extensions: [ros2-humble-ros-base]
 
   shm-daemon:
-    command: usr/bin/launcher.sh
+    command: usr/bin/daemon_launcher.sh
+    command-chain: [usr/bin/ros_setup.sh]
     daemon: simple
     install-mode: disable
     plugs: [network, network-bind, shm-plug]
@@ -62,12 +70,19 @@ apps:
     extensions: [ros2-humble-ros-base]
 
   stop:
-    command: usr/bin/stop.sh
+    command: usr/bin/stop_launcher.sh
 
   flash:
-    command: usr/bin/flash.sh
+    command: usr/bin/flash_launcher.sh
     plugs: [raw-usb, network-bind]
     # plugs: [serial-port, raw-usb, network-bind]
+    extensions: [ros2-humble-ros-base]
+
+  teleop:
+    command: usr/bin/teleop_launcher.sh
+    command-chain: [usr/bin/ros_setup.sh]
+    plugs: [network, network-bind, shm-plug]
+    slots: [shm-slot]
     extensions: [ros2-humble-ros-base]
 
 parts:
@@ -100,6 +115,11 @@ parts:
       [ -n "$(echo $version | grep "+git")" ] && grade=devel || grade=stable
       craftctl set version="$version"
       craftctl set grade="$grade"
+
+  teleop:
+    plugin: nil
+    stage-packages:
+      - ros-humble-teleop-twist-keyboard
 
   # apt-dependencies:
   #   plugin: nil
