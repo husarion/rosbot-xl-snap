@@ -52,19 +52,11 @@ plugs:
 
 apps:
 
-  udp-daemon:
+  daemon:
     command: usr/bin/daemon_launcher.sh
     command-chain: [usr/bin/ros_setup.sh]
     daemon: simple
-    install-mode: disable
-    plugs: [network, network-bind]
-    extensions: [ros2-humble-ros-base]
-
-  shm-daemon:
-    command: usr/bin/daemon_launcher.sh
-    command-chain: [usr/bin/ros_setup.sh]
-    daemon: simple
-    install-mode: disable
+    install-mode: enable
     plugs: [network, network-bind, shm-plug]
     slots: [shm-slot]
     extensions: [ros2-humble-ros-base]
@@ -75,7 +67,6 @@ apps:
   flash:
     command: usr/bin/flash_launcher.sh
     plugs: [raw-usb, network-bind]
-    # plugs: [serial-port, raw-usb, network-bind]
     extensions: [ros2-humble-ros-base]
 
   teleop:
@@ -84,6 +75,21 @@ apps:
     plugs: [network, network-bind, shm-plug]
     slots: [shm-slot]
     extensions: [ros2-humble-ros-base]
+
+  print-serial-number:
+    command: usr/bin/serial_number_launcher.sh
+    command-chain: [usr/bin/ros_setup.sh]
+    plugs: [network, network-bind, shm-plug]
+    slots: [shm-slot]
+    extensions: [ros2-humble-ros-base]
+
+  reset-stm32:
+    command: usr/bin/reset_stm32.py
+    plugs: [raw-usb, network-bind]
+
+  ftdi-config:
+    command: usr/bin/ftdi-eeprom-conf.py
+    plugs: [raw-usb, network-bind]
 
 parts:
   rosbot-xl:
@@ -140,5 +146,6 @@ parts:
     source: snap/local/
     organize:
       '*.sh': usr/bin/
+      '*.py': usr/bin/
       '*.yaml': usr/share/rosbot-xl/config/
       '*.xml': usr/share/rosbot-xl/config/
