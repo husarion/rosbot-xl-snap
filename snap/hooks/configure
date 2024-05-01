@@ -5,18 +5,31 @@
 # - snap refresh
 # - whenever the user runs snap set|unset to change a configuration option
 
+# Define a function to log and echo messages
+log_and_echo() {
+    local message="$1"
+    # Log the message with logger
+    logger -t "${SNAP_NAME}" "configure hook: $message"
+    # Echo the message to standard error
+    echo >&2 "$message"
+}
+
+log() {
+    local message="$1"
+    # Log the message with logger
+    logger -t "${SNAP_NAME}" "configure hook: $message"
+}
+
 # Make sure ROS 2 nodes parameters value is a boolean
 OPTS="mecanum include-camera-mount"
 for OPT in ${OPTS}; do
-  VALUE="$(snapctl get ${OPT})"
+  VALUE="$(snapctl get driver.${OPT})"
   if [ -n "${VALUE}" ]; then
     case "${VALUE}" in
     "True") ;;
     "False") ;;
     *)
-      echo >&2 "'${VALUE}' is not a supported value for '${OPT}'." \
-        "Possible values are True or False."
-      logger -t ${SNAP_NAME} "configure hook: '${VALUE}' is not a supported value for ${OPT}." \
+      log_and_echo "configure hook: '${VALUE}' is not a supported value for ${OPT}." \
         "Possible values are True or False."
       exit 1
       ;;
@@ -32,9 +45,7 @@ if [ -n "${ROS_LOCALHOST_ONLY}" ]; then
   1) ;;
   0) ;;
   *)
-    echo >&2 "'${ROS_LOCALHOST_ONLY}' is not a supported value for '${OPT}'." \
-      "Possible values are 0 or 1."
-    logger -t ${SNAP_NAME} "configure hook: '${ROS_LOCALHOST_ONLY}' is not a supported value for ${OPT}." \
+    log_and_echo "'${ROS_LOCALHOST_ONLY}' is not a supported value for '${OPT}'." \
       "Possible values are 0 or 1."
     exit 1
     ;;
@@ -50,8 +61,7 @@ is_integer() {
 }
 
 if ! is_integer "${ROS_DOMAIN_ID}" || [ "${ROS_DOMAIN_ID}" -lt 0 ] || [ "${ROS_DOMAIN_ID}" -gt 232 ]; then
-  echo >&2 "'${ROS_DOMAIN_ID}' is not a supported value for '${OPT}'. Possible values are integers between 0 and 232."
-  logger -t ${SNAP_NAME} "configure hook: '${ROS_DOMAIN_ID}' is not a supported value for ${OPT}. Possible values are integers between 0 and 232."
+  log_and_echo "'${ROS_DOMAIN_ID}' is not a supported value for '${OPT}'. Possible values are integers between 0 and 232."
   exit 1
 fi
 
@@ -62,22 +72,19 @@ TRANSPORT_SETTING="$(snapctl get ${OPT})"
 # Check if the transport setting is valid
 case "$TRANSPORT_SETTING" in
 "udp")
-  logger -t ${SNAP_NAME} "configure hook: '$TRANSPORT_SETTING' transport set."
+  log "'$TRANSPORT_SETTING' transport set."
   ;;
 "shm" | "builtin")
   if snapctl is-connected shm-plug; then
-    logger -t ${SNAP_NAME} "configure hook: '$TRANSPORT_SETTING' transport set."
+    log "'$TRANSPORT_SETTING' transport set."
   else
-    echo >&2 "to use 'builtin' and 'shm' tranport shm-plug need to be connected, please run:"
-    echo >&2 "sudo snap connect ${SNAP_NAME}:shm-plug ${SNAP_NAME}:shm-slot"
-    logger -t ${SNAP_NAME} "to use 'builtin' and 'shm' tranport shm-plug need to be connected, please run:"
-    logger -t ${SNAP_NAME} "sudo snap connect ${SNAP_NAME}:shm-plug ${SNAP_NAME}:shm-slot"
+    log_and_echo "to use 'builtin' and 'shm' tranport shm-plug need to be connected, please run:"
+    log_and_echo "sudo snap connect ${SNAP_NAME}:shm-plug ${SNAP_NAME}:shm-slot"
     exit 1
   fi
   ;;
 *)
-  echo >&2 "'${TRANSPORT_SETTING}' is not a supported value for '${OPT}'. Possible values are: udp, shm, builtin."
-  logger -t ${SNAP_NAME} "configure hook: '${TRANSPORT_SETTING}' is not a supported value for '${OPT}'. Possible values are: udp, shm, builtin."
+  log_and_echo "'${TRANSPORT_SETTING}' is not a supported value for '${OPT}'. Possible values are: udp, shm, builtin."
   exit 1
   ;;
 esac
@@ -86,50 +93,9 @@ esac
 ROS_PLUG="ros-humble-ros-base"
 
 if ! snapctl is-connected ${ROS_PLUG}; then
-    echo >&2 "Plug '${ROS_PLUG}' isn't connected. Please run:"
-    echo >&2 "snap connect ${SNAP_NAME}:${ROS_PLUG} ${ROS_PLUG}:${ROS_PLUG}"
-    logger -t ${SNAP_NAME} "Plug '${ROS_PLUG}' isn't connected, please run:"
-    logger -t ${SNAP_NAME} "snap connect ${SNAP_NAME}:${ROS_PLUG} ${ROS_PLUG}:${ROS_PLUG}"
+    log_and_echo "Plug '${ROS_PLUG}' isn't connected. Please run:"
+    log_and_echo "snap connect ${SNAP_NAME}:${ROS_PLUG} ${ROS_PLUG}:${ROS_PLUG}"
     exit 1
 fi
 
-# Define the names of the daemons using SNAP_NAME
-udp_daemon="${SNAP_NAME}.udp-daemon"
-shm_daemon="${SNAP_NAME}.shm-daemon"
-
-# Check the transport setting and act accordingly
-if [ "$TRANSPORT_SETTING" = "udp" ]; then
-    # Stop the SHM daemon if it is running
-    if snapctl services $shm_daemon | grep -qw active; then
-        snapctl stop $shm_daemon --disable
-        logger -t "${SNAP_NAME}" "Stopped $shm_daemon with --disable"
-    fi
-
-    # Check if the UDP daemon is already running
-    if snapctl services $udp_daemon | grep -qw active; then
-        # Restart the daemon if it is already running
-        snapctl restart $udp_daemon
-        logger -t "${SNAP_NAME}" "Restarted $udp_daemon"
-    else
-        # Start the UDP daemon if it is not running
-        snapctl start $udp_daemon --enable
-        logger -t "${SNAP_NAME}" "Started $udp_daemon with --enable"
-    fi
-elif [ "$TRANSPORT_SETTING" = "builtin" ] || [ "$TRANSPORT_SETTING" = "shm" ]; then
-    # Stop the UDP daemon if it is running
-    if snapctl services $udp_daemon | grep -qw active; then
-        snapctl stop $udp_daemon --disable
-        logger -t "${SNAP_NAME}" "Stopped $udp_daemon with --disable"
-    fi
-
-    # Check if the SHM daemon is already running
-    if snapctl services $shm_daemon | grep -qw active; then
-        # Restart the daemon if it is already running
-        snapctl restart $shm_daemon
-        logger -t "${SNAP_NAME}" "Restarted $shm_daemon"
-    else
-        # Start the SHM daemon if it is not running
-        snapctl start $shm_daemon --enable
-        logger -t "${SNAP_NAME}" "Started $shm_daemon with --enable"
-    fi
-fi
+snapctl restart ${SNAP_NAME}.daemon

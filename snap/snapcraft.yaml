@@ -8,14 +8,20 @@ description: |
 
   It offers the following parameters,
 
-  - mecanum
-  - include-camera-mount
-  - camera-model
-  - lidar-model
+  - ros-domain-id
+  - ros-localhost-only
+  - fastdds-default-profiles-file
+  - transport
+  - serial-port
+  - driver.namespace
+  - driver.mecanum
+  - driver.include-camera-mount
+  - driver.camera-model
+  - driver.lidar-model
 
   which can be set as follows, e.g.,
 
-    snap set rosbot-xl mecanum=True
+    snap set rosbot-xl driver.mecanum=True
 
 grade: stable
 confinement: strict
@@ -46,29 +52,54 @@ plugs:
 
 apps:
 
-  udp-daemon:
+  daemon:
     command: usr/bin/launcher.sh
+    command-chain: [usr/bin/ros_setup.sh]
     daemon: simple
-    install-mode: disable
-    plugs: [network, network-bind]
-    extensions: [ros2-humble-ros-base]
-
-  shm-daemon:
-    command: usr/bin/launcher.sh
-    daemon: simple
-    install-mode: disable
+    install-mode: enable
     plugs: [network, network-bind, shm-plug]
     slots: [shm-slot]
     extensions: [ros2-humble-ros-base]
 
-  stop:
-    command: usr/bin/stop.sh
+  rosbot-xl:
+    command: usr/bin/launcher.sh
+    command-chain: [usr/bin/check_daemon_running.sh, usr/bin/ros_setup.sh]
+    plugs: [network, network-bind, shm-plug]
+    slots: [shm-slot]
+    extensions: [ros2-humble-ros-base]
 
   flash:
-    command: usr/bin/flash.sh
+    command: usr/bin/flash_launcher.sh
     plugs: [raw-usb, network-bind]
-    # plugs: [serial-port, raw-usb, network-bind]
     extensions: [ros2-humble-ros-base]
+
+  teleop:
+    command: usr/bin/teleop_launcher.sh
+    command-chain: [usr/bin/ros_setup.sh]
+    plugs: [network, network-bind, shm-plug]
+    slots: [shm-slot]
+    extensions: [ros2-humble-ros-base]
+
+  print-serial-number:
+    command: usr/bin/serial_number_launcher.sh
+    command-chain: [usr/bin/ros_setup.sh]
+    plugs: [network, network-bind, shm-plug]
+    slots: [shm-slot]
+    extensions: [ros2-humble-ros-base]
+
+  start:
+    command: usr/bin/start_launcher.sh
+
+  stop:
+    command: usr/bin/stop_launcher.sh
+
+  reset-stm32:
+    command: usr/bin/reset_stm32.py
+    plugs: [raw-usb, network-bind]
+
+  config-ftdi:
+    command: usr/bin/ftdi-eeprom-conf.py
+    plugs: [raw-usb, network-bind]
 
 parts:
   rosbot-xl:
@@ -101,6 +132,11 @@ parts:
       craftctl set version="$version"
       craftctl set grade="$grade"
 
+  teleop:
+    plugin: nil
+    stage-packages:
+      - ros-humble-teleop-twist-keyboard
+
   # apt-dependencies:
   #   plugin: nil
   #   stage-packages:
@@ -120,5 +156,6 @@ parts:
     source: snap/local/
     organize:
       '*.sh': usr/bin/
+      '*.py': usr/bin/
       '*.yaml': usr/share/rosbot-xl/config/
       '*.xml': usr/share/rosbot-xl/config/
