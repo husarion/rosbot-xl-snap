@@ -23,7 +23,7 @@ log() {
 # Make sure ROS 2 nodes parameters value is a boolean
 OPTS="mecanum include-camera-mount"
 for OPT in ${OPTS}; do
-  VALUE="$(snapctl get ${OPT})"
+  VALUE="$(snapctl get driver.${OPT})"
   if [ -n "${VALUE}" ]; then
     case "${VALUE}" in
     "True") ;;
@@ -99,44 +99,3 @@ if ! snapctl is-connected ${ROS_PLUG}; then
 fi
 
 snapctl restart ${SNAP_NAME}.daemon
-
-# # Define the names of the daemons using SNAP_NAME
-# udp_daemon="${SNAP_NAME}.udp-daemon"
-# shm_daemon="${SNAP_NAME}.shm-daemon"
-
-# # Check the transport setting and act accordingly
-# if [ "$TRANSPORT_SETTING" = "udp" ]; then
-#     # Stop the SHM daemon if it is running
-#     if snapctl services $shm_daemon | grep -qw active; then
-#         snapctl stop $shm_daemon --disable
-#         log "Stopped $shm_daemon with --disable"
-#     fi
-
-#     # Check if the UDP daemon is already running
-#     if snapctl services $udp_daemon | grep -qw active; then
-#         # Restart the daemon if it is already running
-#         snapctl restart $udp_daemon
-#         log "Restarted $udp_daemon"
-#     else
-#         # Start the UDP daemon if it is not running
-#         snapctl start $udp_daemon --enable
-#         log "Started $udp_daemon with --enable"
-#     fi
-# elif [ "$TRANSPORT_SETTING" = "builtin" ] || [ "$TRANSPORT_SETTING" = "shm" ]; then
-#     # Stop the UDP daemon if it is running
-#     if snapctl services $udp_daemon | grep -qw active; then
-#         snapctl stop $udp_daemon --disable
-#         log "Stopped $udp_daemon with --disable"
-#     fi
-
-#     # Check if the SHM daemon is already running
-#     if snapctl services $shm_daemon | grep -qw active; then
-#         # Restart the daemon if it is already running
-#         snapctl restart $shm_daemon
-#         log "Restarted $shm_daemon"
-#     else
-#         # Start the SHM daemon if it is not running
-#         snapctl start $shm_daemon --enable
-#         log "Started $shm_daemon with --enable"
-#     fi
-# fi

@@ -2,12 +2,12 @@
 
 # Parameters are 'unset'.
 # Default configuration values is left to the launch file.
-snapctl set mecanum!
-snapctl set include-camera-mount!
-snapctl set camera-model!
-snapctl set lidar-model!
+snapctl set driver.mecanum=True
+snapctl set driver.include-camera-mount=True
+snapctl set driver.camera-model!
+snapctl set driver.lidar-model!
+snapctl set driver.namespace! # unset
 snapctl set serial-port="/dev/ttyUSBDB"
-snapctl set namespace! # unset
 snapctl set transport="udp"
 snapctl set ros-localhost-only=0
 snapctl set ros-domain-id=0
@@ -27,3 +27,9 @@ if ! snapctl is-connected raw-usb; then
   logger -t ${SNAP_NAME} "Plug 'raw-usb' isn't connected, \
     please run: snap connect ${SNAP_NAME}:raw-usb"
 fi
+
+# copy meshes to shared folder
+logger -t ${SNAP_NAME} "copy meshes to '${SNAP_COMMON}/ros2_ws/'"
+mkdir -p ${SNAP_COMMON}/ros2_ws
+cp -r $SNAP/opt/ros/snap/share/rosbot_xl_description ${SNAP_COMMON}/ros2_ws/rosbot_xl_description
+cp -r $SNAP/opt/ros/snap/share/ros_components_description ${SNAP_COMMON}/ros2_ws/ros_components_description
