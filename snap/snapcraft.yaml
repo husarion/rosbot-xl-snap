@@ -61,6 +61,12 @@ apps:
     slots: [shm-slot]
     extensions: [ros2-humble-ros-base]
 
+  db-server:
+    command: usr/bin/db_server_launcher.sh
+    daemon: simple
+    install-mode: enable
+    plugs: [network, network-bind, shutdown]
+
   rosbot-xl:
     command: usr/bin/launcher.sh
     command-chain: [usr/bin/check_daemon_running.sh, usr/bin/ros_setup.sh]
@@ -137,10 +143,12 @@ parts:
     stage-packages:
       - ros-humble-teleop-twist-keyboard
 
-  # apt-dependencies:
-  #   plugin: nil
-  #   stage-packages:
-  #     - ros-humble-rmw-cyclonedds-cpp
+  apt-deppendencies:
+    plugin: nil
+    stage-packages:
+      - dbus
+      - curl
+      - netcat
 
   pip3-dependencies:
     plugin: python
