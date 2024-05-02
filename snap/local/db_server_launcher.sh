@@ -6,13 +6,20 @@ log() {
     local message="$1"
     # Log the message with logger
     logger -t "${SNAP_NAME}" "db_server_launcher: $message"
+    # Echo the message to standard error
+    echo >&2 "$message"
 }
 
+SERVER_IP=192.168.77.2
+SERVER_PORT=3000
 
-rm -f response
-mkfifo response
+fifo_path="/tmp/response"
+rm -f "$fifo_path"
+mkfifo "$fifo_path"
 
-ENABLE_SHUTDOWN="false"
+# Define a path for the shutdown flag file
+SHUTDOWN_FLAG="/tmp/shutdown_flag"
+rm -f "$SHUTDOWN_FLAG"  # Ensure it does not exist initially
 
 handleRequest() {
     while read -r line; do
@@ -34,30 +41,27 @@ handleRequest() {
         ;;
     "GET /shutdown")
         RESPONSE="HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\nshutting down"
-        ENABLE_SHUTDOWN="true"
+        touch "$SHUTDOWN_FLAG"  # Create the flag file to signal shutdown
         ;;
     *)
         RESPONSE="HTTP/1.1 404 NotFound\r\nContent-Type: text/html\r\n\r\nNot Found"
         ;;
     esac
 
-    echo -e "$RESPONSE" >response
+    echo -e "$RESPONSE" >"$fifo_path"
 }
 
 # check if we can start db-server
 
 # Send a GET request to the server's /ping endpoint
-status=$(curl --silent --max-time 1 "http://192.168.77.2:3000/ping")
+status=$(curl --silent --max-time 1 "http://$SERVER_IP:$SERVER_PORT/ping")
 if [ $? -eq 0 ]; then
     log "Received response: $status"
-else
-    log "Failed to receive response, handling error..."
-    # Implement error handling logic here
 fi
 
 # Check the response
 if [[ "$status" == "pong" ]]; then
-  log "[!] Legacy server running on port 3000. To turn it off run:"
+  log "Legacy server running on port 3000. To turn it off run:"
   log "sudo systemctl stop db-server.service && sudo systemctl disable db-server.service"
   log "After that start the service:"
   log "sudo snap start --enable ${SNAP_NAME}.db-server"
@@ -65,20 +69,18 @@ if [[ "$status" == "pong" ]]; then
   snapctl stop --disable ${SNAP_NAME}.db-server 2>&1 || true
 fi
 
-log 'Listening on 3000...'
+log "Listening on $SERVER_IP:$SERVER_PORT..."
 
 while true; do
     # Handle requests
-    nc -l -p 3000 -s 192.168.77.2 < response | handleRequest
+    cat "$fifo_path" | nc -lN -s $SERVER_IP -p $SERVER_PORT | handleRequest
 
-    sleep 1
-
-    # Check if shutdown is enabled
-    if [[ "$ENABLE_SHUTDOWN" == "true" ]]; then
+    if [ -f "$SHUTDOWN_FLAG" ]; then
         log "shutting down..."
-        
         dbus-send --system --print-reply --dest=org.freedesktop.login1 \
         /org/freedesktop/login1 org.freedesktop.login1.Manager.PowerOff boolean:true
         break
     fi
+
+    sleep 1
 done
