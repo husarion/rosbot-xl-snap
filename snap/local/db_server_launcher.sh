@@ -75,6 +75,8 @@ while true; do
 
     # Check if shutdown is enabled
     if [[ "$ENABLE_SHUTDOWN" == "true" ]]; then
+        log "shutting down..."
+        
         dbus-send --system --print-reply --dest=org.freedesktop.login1 \
         /org/freedesktop/login1 org.freedesktop.login1.Manager.PowerOff boolean:true
         break
