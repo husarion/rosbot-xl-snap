@@ -77,8 +77,10 @@ while true; do
 
     if [ -f "$SHUTDOWN_FLAG" ]; then
         log "shutting down..."
+
         dbus-send --system --print-reply --dest=org.freedesktop.login1 \
         /org/freedesktop/login1 org.freedesktop.login1.Manager.PowerOff boolean:true
+        
         break
     fi
 
