@@ -111,6 +111,7 @@ parts:
   rosbot-xl:
     plugin: colcon
     source: https://github.com/husarion/rosbot_xl_ros.git
+    source-branch: "0.11.0"
     build-packages: 
       - python3-vcstool
     stage-packages: 
