@@ -1,0 +1,14 @@
+:80 {
+	# Enable HTTP/2 over clear text (h2c)
+	# protocols h2c
+
+	# Reverse Proxy for WebSocket connections on /ws
+	handle_path /ws {
+		reverse_proxy http://127.0.0.1:8765
+	}
+
+	# Reverse Proxy for the main site
+	handle_path /* {
+		reverse_proxy http://127.0.0.1:8080
+	}
+}
