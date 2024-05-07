@@ -11,15 +11,12 @@ TRANSPORT="$(snapctl get transport)"
 log "transport: ${TRANSPORT}"
 
 if [ "$TRANSPORT" = "builtin" ]; then
-  log "using builtin transport"
+  log "using builtin transport setting"
 else
   PROFILE_FILE="${SNAP_COMMON}/${TRANSPORT}.xml"
-  if [ -f "$PROFILE_FILE" ]; then
-    export FASTRTPS_DEFAULT_PROFILES_FILE=$PROFILE_FILE
-    log "$(cat $FASTRTPS_DEFAULT_PROFILES_FILE)"
-  else
-    log "Transport file for ${TRANSPORT} does not exist"
-  fi
+  export FASTRTPS_DEFAULT_PROFILES_FILE=$PROFILE_FILE
+  log "using ${PROFILE_FILE} transport setting"
+  log "$(cat $FASTRTPS_DEFAULT_PROFILES_FILE)"
 fi
 
 export ROS_LOCALHOST_ONLY="$(snapctl get ros-localhost-only)"

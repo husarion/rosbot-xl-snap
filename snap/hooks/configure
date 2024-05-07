@@ -69,25 +69,11 @@ fi
 OPT="transport"
 TRANSPORT_SETTING="$(snapctl get ${OPT})"
 
-# Check if the transport setting is valid
-case "$TRANSPORT_SETTING" in
-"udp")
-  log "'$TRANSPORT_SETTING' transport set."
-  ;;
-"shm" | "builtin")
-  if snapctl is-connected shm-plug; then
-    log "'$TRANSPORT_SETTING' transport set."
-  else
-    log_and_echo "to use 'builtin' and 'shm' tranport shm-plug need to be connected, please run:"
-    log_and_echo "sudo snap connect ${SNAP_NAME}:shm-plug ${SNAP_NAME}:shm-slot"
-    exit 1
-  fi
-  ;;
-*)
-  log_and_echo "'${TRANSPORT_SETTING}' is not a supported value for '${OPT}'. Possible values are: udp, shm, builtin."
+# Only exit with status 1 if conditions are not met
+if [ "$TRANSPORT_SETTING" != "builtin" ] && [ ! -f "${SNAP_COMMON}/${TRANSPORT_SETTING}.xml" ]; then
+  log_and_echo "'${SNAP_COMMON}/${TRANSPORT_SETTING}.xml' does not exist."
   exit 1
-  ;;
-esac
+fi
 
 # Make sure ros-humble-ros-base is connected
 ROS_PLUG="ros-humble-ros-base"
