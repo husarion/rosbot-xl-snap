@@ -19,7 +19,6 @@ snapctl set serial-port="/dev/ttyUSBDB"
 snapctl set transport="udp"
 snapctl set ros-localhost-only=0
 snapctl set ros-domain-id=0
-snapctl set fastdds-default-profiles-file="fastdds.xml"
 
 if ! snapctl is-connected ros-humble-ros-base; then
   log "Plug 'ros-humble-ros-base' isn't connected, please run:"
@@ -41,3 +40,6 @@ log "copy meshes to '${SNAP_COMMON}/ros2_ws/'"
 mkdir -p ${SNAP_COMMON}/ros2_ws
 cp -r $SNAP/opt/ros/snap/share/rosbot_xl_description ${SNAP_COMMON}/ros2_ws/rosbot_xl_description
 cp -r $SNAP/opt/ros/snap/share/ros_components_description ${SNAP_COMMON}/ros2_ws/ros_components_description
+
+# copy DDS config files to shared folder
+cp -r $SNAP/usr/share/rosbot-xl/config/*.xml ${SNAP_COMMON}/

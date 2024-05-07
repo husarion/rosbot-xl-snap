@@ -6,35 +6,20 @@ log() {
     logger -t "${SNAP_NAME}" "ros_setup: $message"
 }
 
-FASTDDS_FILE=$(snapctl get fastdds-default-profiles-file)
+TRANSPORT="$(snapctl get transport)"
+# watch the log with: "journalctl -t ${SNAP_NAME}"
+log "transport: ${TRANSPORT}"
 
-if [ ! -f "${SNAP_COMMON}/${FASTDDS_FILE}" ]; then
-  # eg. /var/snap/rosbot-xl/common/fastdds.xml
-  log "${SNAP_COMMON}/${FASTDDS_FILE} does not exist."
-fi
-
-if [ -n "${FASTDDS_FILE}" ] && [ -f "${SNAP_COMMON}/${FASTDDS_FILE}" ]; then
-  export FASTRTPS_DEFAULT_PROFILES_FILE=${SNAP_COMMON}/${FASTDDS_FILE}
-  log "Using FASTRTPS profile: ${FASTRTPS_DEFAULT_PROFILES_FILE}"
-  log "$(cat $FASTRTPS_DEFAULT_PROFILES_FILE)"
+if [ "$TRANSPORT" = "builtin" ]; then
+  log "using builtin transport"
 else
-  TRANSPORT="$(snapctl get transport)"
-  # watch the log with: "journalctl -t rosbot-xl"
-  log "transport: ${TRANSPORT}"
-
-  case "$TRANSPORT" in
-  shm)
-    export FASTRTPS_DEFAULT_PROFILES_FILE=$SNAP/usr/share/rosbot-xl/config/shm-only.xml
+  PROFILE_FILE="${SNAP_COMMON}/${TRANSPORT}.xml"
+  if [ -f "$PROFILE_FILE" ]; then
+    export FASTRTPS_DEFAULT_PROFILES_FILE=$PROFILE_FILE
     log "$(cat $FASTRTPS_DEFAULT_PROFILES_FILE)"
-    ;;
-  udp)
-    export FASTRTPS_DEFAULT_PROFILES_FILE=$SNAP/usr/share/rosbot-xl/config/udp-only.xml
-    log "$(cat $FASTRTPS_DEFAULT_PROFILES_FILE)"
-    ;;
-  builtin)
-    log "using builtin transport"
-    ;;
-  esac
+  else
+    log "Transport file for ${TRANSPORT} does not exist"
+  fi
 fi
 
 export ROS_LOCALHOST_ONLY="$(snapctl get ros-localhost-only)"
