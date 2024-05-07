@@ -75,6 +75,14 @@ if [ "$TRANSPORT_SETTING" != "builtin" ] && [ ! -f "${SNAP_COMMON}/${TRANSPORT_S
   exit 1
 fi
 
+if [ "$TRANSPORT_SETTING" = "builtin" ] || [ "$TRANSPORT_SETTING" = "shm" ]; then
+  if ! snapctl is-connected shm-plug; then
+    log_and_echo "to use 'builtin' and 'shm' tranport shm-plug need to be connected, please run:"
+    log_and_echo "sudo snap connect ${SNAP_NAME}:shm-plug ${SNAP_NAME}:shm-slot"
+    exit 1
+  fi
+fi
+
 # Make sure ros-humble-ros-base is connected
 ROS_PLUG="ros-humble-ros-base"
 

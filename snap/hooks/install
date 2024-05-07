@@ -43,3 +43,6 @@ cp -r $SNAP/opt/ros/snap/share/ros_components_description ${SNAP_COMMON}/ros2_ws
 
 # copy DDS config files to shared folder
 cp -r $SNAP/usr/share/rosbot-xl/config/*.xml ${SNAP_COMMON}/
+
+# copy joy params
+cp -r $SNAP/usr/share/rosbot-xl/config/teleop_twist_joy_params.yaml ${SNAP_COMMON}/

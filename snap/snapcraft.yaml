@@ -107,6 +107,21 @@ apps:
     command: usr/bin/ftdi-eeprom-conf.py
     plugs: [raw-usb, network-bind]
 
+  caddy-server:
+    command: usr/bin/caddy_launcher.sh
+    daemon: simple
+    install-mode: disable
+    plugs: [network, network-bind]
+
+  bridge:
+    command: usr/bin/bridge_launcher.sh
+    command-chain: [usr/bin/ros_setup.sh]
+    daemon: simple
+    install-mode: disable
+    plugs: [network, network-bind, shm-plug]
+    slots: [shm-slot]
+    extensions: [ros2-humble-ros-base]
+
 parts:
   rosbot-xl:
     plugin: colcon
@@ -142,6 +157,31 @@ parts:
     plugin: nil
     stage-packages:
       - ros-humble-teleop-twist-keyboard
+      - ros-humble-teleop-twist-joy
+
+  caddy-server:
+    plugin: nil
+    build-packages:
+      - curl
+    build-environment:
+      - CADDY_RELEASE: "2.7.4"
+    override-build: |
+      curl -L https://github.com/caddyserver/caddy/releases/download/v${CADDY_RELEASE}/caddy_${CADDY_RELEASE}_linux_${CRAFT_ARCH_BUILD_FOR}.deb -o caddy.deb
+      dpkg -i caddy.deb
+
+  web-bridge:
+    plugin: nil
+    stage-packages:
+      - ros-humble-foxglove-bridge
+      - ros-humble-rosbridge-server
+      - ros-humble-bond
+      - ros-humble-control-msgs
+      - ros-humble-controller-manager-msgs
+      - ros-humble-image-transport-plugins
+      - ros-humble-map-msgs
+      - ros-humble-nav2-msgs
+      - ros-humble-tf2-msgs
+      - ros-humble-robot-localization
 
   apt-deppendencies:
     plugin: nil
@@ -167,3 +207,4 @@ parts:
       '*.py': usr/bin/
       '*.yaml': usr/share/rosbot-xl/config/
       '*.xml': usr/share/rosbot-xl/config/
+      'Caddyfile': etc/caddy/
