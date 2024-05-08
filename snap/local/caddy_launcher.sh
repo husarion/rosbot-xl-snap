@@ -1,24 +1,36 @@
 #!/usr/bin/bash
 
+# Define a function to log and echo messages
+log_and_echo() {
+    local message="$1"
+    # Log the message with logger
+    logger -t "${SNAP_NAME}" "caddy_launcher: $message"
+    # Echo the message to standard error
+    echo >&2 "$message"
+}
+
 # Define the source and destination directories
-site_path="$SNAP/usr/local/www/foxglove/"
-site_tmp_path="$SNAP_DATA/www/foxglove/"
+site_path="$SNAP/usr/local/www/"
+site_tmp_path="$SNAP_DATA/www/"
+layout="$(snapctl get webui.layout)"
+log_and_echo "Using ${SNAP_COMMON}/$layout"
 
 # Ensure the destination directory exists
 rm -rf $site_tmp_path
 mkdir -p "$site_tmp_path"
 
-# Copy all files and directories recursively from site_path to site_tmp_path
-cp -a "$site_path"/* "$site_tmp_path"
+# Copy foxglove folder to temp path
+cp -R $site_path/foxglove $site_tmp_path
 
-index_html=$(cat $site_tmp_path/index.html)
-
+# apply the layout
+index_html_path=$site_tmp_path/foxglove/index.html
+index_html_content=$(cat $index_html_path)
 replace_pattern='/*FOXGLOVE_STUDIO_DEFAULT_LAYOUT_PLACEHOLDER*/'
-replace_value=$(cat $SNAP/usr/share/$SNAP_NAME/config/foxglove-layout.json)
-echo "${index_html/"$replace_pattern"/$replace_value}" > $site_tmp_path/index.html
+replace_value=$(cat ${SNAP_COMMON}/$layout)
+echo "${index_html_content/"$replace_pattern"/$replace_value}" > $index_html_path
 
 # disable cache
-sed -i "s|<div id=\"root\"></div>|<script>\nlocalStorage.clear();sessionStorage.clear();\n</script>\n&|" $site_tmp_path/index.html
+sed -i "s|<div id=\"root\"></div>|<script>\nlocalStorage.clear();sessionStorage.clear();\n</script>\n&|" $index_html_path
 
 # Define a function to log and echo messages
 caddy run --config $SNAP/usr/share/$SNAP_NAME/config/Caddyfile --adapter caddyfile
