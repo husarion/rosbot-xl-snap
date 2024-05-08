@@ -1,3 +1,11 @@
+# :8080 {
+# 	# Serve static files from /var/www/foxglove
+# 	root * /var/www/foxglove
+
+# 	# Handle all requests
+# 	file_server
+# }
+
 :80 {
 	# Enable HTTP/2 over clear text (h2c)
 	# protocols h2c
@@ -9,6 +17,26 @@
 
 	# Reverse Proxy for the main site
 	handle_path /* {
-		reverse_proxy http://127.0.0.1:8080
+		# reverse_proxy http://127.0.0.1:8080
+		# Serve static files from /var/www/foxglove
+		root * {$SNAP_DATA}/www/foxglove/
+	
+		@ipv6Client {
+			expression {http.request.host}.startsWith("fc94")
+		}
+
+		handle @ipv6Client {
+			vars full_host [{http.request.host}]
+			redir /ui /?ds=foxglove-websocket&ds.url=ws%3A%2F%2F%5B{http.request.host}%5D%2Fws
+		}
+
+		# Handle all other requests (from non-IPv6 clients)
+		handle {
+			vars full_host {http.request.host}
+			redir /ui /?ds=foxglove-websocket&ds.url=ws%3A%2F%2F{http.request.host}%2Fws
+		}
+
+		# Handle all requests
+		file_server
 	}
 }

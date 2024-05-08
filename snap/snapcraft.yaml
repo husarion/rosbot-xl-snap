@@ -107,13 +107,13 @@ apps:
     command: usr/bin/ftdi-eeprom-conf.py
     plugs: [raw-usb, network-bind]
 
-  caddy-server:
+  web-ui:
     command: usr/bin/caddy_launcher.sh
     daemon: simple
     install-mode: disable
     plugs: [network, network-bind]
 
-  bridge:
+  web-ws:
     command: usr/bin/bridge_launcher.sh
     command-chain: [usr/bin/ros_setup.sh]
     daemon: simple
@@ -121,6 +121,12 @@ apps:
     plugs: [network, network-bind, shm-plug]
     slots: [shm-slot]
     extensions: [ros2-humble-ros-base]
+
+  start-web-ui:
+    command: usr/bin/start_web_ui_launcher.sh
+
+  stop-web-ui:
+    command: usr/bin/stop_web_ui_launcher.sh
 
 parts:
   rosbot-xl:
@@ -159,17 +165,40 @@ parts:
       - ros-humble-teleop-twist-keyboard
       - ros-humble-teleop-twist-joy
 
-  caddy-server:
+  # web-ui:
+  #   plugin: nil
+  #   build-packages:
+  #     - curl
+  #   build-environment:
+  #     - CADDY_RELEASE: "2.7.4"
+  #   override-build: |
+  #     set -x
+  #     craftctl default
+  #     curl -L https://github.com/caddyserver/caddy/releases/download/v${CADDY_RELEASE}/caddy_${CADDY_RELEASE}_linux_${CRAFT_ARCH_BUILD_FOR}.deb -o caddy.deb
+  #     dpkg -i caddy.deb
+
+  web-server:
+    plugin: dump
+    source: 
+      - on amd64: https://github.com/caddyserver/caddy/releases/download/v2.7.4/caddy_2.7.4_linux_amd64.deb
+      - on arm64: https://github.com/caddyserver/caddy/releases/download/v2.7.4/caddy_2.7.4_linux_arm64.deb
+    source-type: deb
+
+  web-ui:
     plugin: nil
     build-packages:
       - curl
-    build-environment:
-      - CADDY_RELEASE: "2.7.4"
     override-build: |
-      curl -L https://github.com/caddyserver/caddy/releases/download/v${CADDY_RELEASE}/caddy_${CADDY_RELEASE}_linux_${CRAFT_ARCH_BUILD_FOR}.deb -o caddy.deb
-      dpkg -i caddy.deb
+      # Use the Snapcraft build directory which is writable
+      cd $SNAPCRAFT_PART_BUILD
+      curl -L https://github.com/husarion/foxglove-studio/releases/download/v1.0.1/web-build.tar.gz -o foxglove.tar.gz
+      mkdir -p www/foxglove
+      tar -xzf foxglove.tar.gz -C www/foxglove
+      rm foxglove.tar.gz
+      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/local
+      cp -r www $SNAPCRAFT_PART_INSTALL/usr/local
 
-  web-bridge:
+  web-ws:
     plugin: nil
     stage-packages:
       - ros-humble-foxglove-bridge
@@ -183,7 +212,7 @@ parts:
       - ros-humble-tf2-msgs
       - ros-humble-robot-localization
 
-  apt-deppendencies:
+  db-server:
     plugin: nil
     stage-packages:
       - dbus
@@ -207,4 +236,5 @@ parts:
       '*.py': usr/bin/
       '*.yaml': usr/share/rosbot-xl/config/
       '*.xml': usr/share/rosbot-xl/config/
-      'Caddyfile': etc/caddy/
+      '*.json': usr/share/rosbot-xl/config/
+      'Caddyfile': usr/share/rosbot-xl/config/
