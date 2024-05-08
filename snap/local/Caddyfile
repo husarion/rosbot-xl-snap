@@ -1,3 +1,11 @@
+# :8080 {
+# 	# Serve static files from /var/www/foxglove
+# 	root * /var/www/foxglove
+
+# 	# Handle all requests
+# 	file_server
+# }
+
 :80 {
 	# Enable HTTP/2 over clear text (h2c)
 	# protocols h2c
@@ -9,6 +17,11 @@
 
 	# Reverse Proxy for the main site
 	handle_path /* {
-		reverse_proxy http://127.0.0.1:8080
+		# reverse_proxy http://127.0.0.1:8080
+		# Serve static files from /var/www/foxglove
+		root * {$SNAP}/usr/local/www/foxglove
+
+		# Handle all requests
+		file_server
 	}
 }

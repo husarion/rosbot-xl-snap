@@ -93,7 +93,7 @@ if ! snapctl is-connected ${ROS_PLUG}; then
 fi
 
 # restart services with new ROS 2 config
-for service in daemon caddy-server bridge; do
+for service in daemon web-ui web-ws; do
   if snapctl services ${SNAP_NAME}.${service} | grep -qw active; then
     snapctl restart ${SNAP_NAME}.${service}
     log "Restarted ${SNAP_NAME}.${service}"
