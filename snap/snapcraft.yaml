@@ -236,4 +236,5 @@ parts:
       '*.py': usr/bin/
       '*.yaml': usr/share/rosbot-xl/config/
       '*.xml': usr/share/rosbot-xl/config/
+      '*.json': usr/share/rosbot-xl/config/
       'Caddyfile': usr/share/rosbot-xl/config/
