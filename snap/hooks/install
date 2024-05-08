@@ -15,7 +15,7 @@ snapctl set driver.include-camera-mount=True
 snapctl set driver.camera-model!
 snapctl set driver.lidar-model!
 snapctl set driver.namespace! # unset
-snapctl set webui.layout=foxglove-default.json
+snapctl set webui.layout=default
 snapctl set serial-port="/dev/ttyUSBDB"
 snapctl set transport="udp"
 snapctl set ros-localhost-only=0

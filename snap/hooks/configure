@@ -83,6 +83,16 @@ if [ "$TRANSPORT_SETTING" = "builtin" ] || [ "$TRANSPORT_SETTING" = "shm" ]; the
   fi
 fi
 
+# Get the transport setting using snapctl
+OPT="webui.layout"
+LAYOUT="$(snapctl get ${OPT})"
+
+# Only exit with status 1 if conditions are not met
+if [ ! -f "${SNAP_COMMON}/foxglove-${LAYOUT}.json" ]; then
+  log_and_echo "'${SNAP_COMMON}/foxglove-${LAYOUT}.json' does not exist."
+  exit 1
+fi
+
 # Make sure ros-humble-ros-base is connected
 ROS_PLUG="ros-humble-ros-base"
 

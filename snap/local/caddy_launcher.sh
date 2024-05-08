@@ -13,7 +13,7 @@ log_and_echo() {
 site_path="$SNAP/usr/local/www/"
 site_tmp_path="$SNAP_DATA/www/"
 layout="$(snapctl get webui.layout)"
-log_and_echo "Using ${SNAP_COMMON}/$layout"
+log_and_echo "Using ${SNAP_COMMON}/foxglove-$layout.json"
 
 # Ensure the destination directory exists
 rm -rf $site_tmp_path
@@ -26,7 +26,7 @@ cp -R $site_path/foxglove $site_tmp_path
 index_html_path=$site_tmp_path/foxglove/index.html
 index_html_content=$(cat $index_html_path)
 replace_pattern='/*FOXGLOVE_STUDIO_DEFAULT_LAYOUT_PLACEHOLDER*/'
-replace_value=$(cat ${SNAP_COMMON}/$layout)
+replace_value=$(cat ${SNAP_COMMON}/foxglove-$layout.json)
 echo "${index_html_content/"$replace_pattern"/$replace_value}" > $index_html_path
 
 # disable cache
