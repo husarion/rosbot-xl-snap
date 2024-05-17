@@ -129,40 +129,10 @@ apps:
     command: usr/bin/stop_web_ui_launcher.sh
 
 parts:
-  # rosbot-xl:
-  #   plugin: colcon
-  #   source: https://github.com/husarion/rosbot_xl_ros.git
-  #   source-branch: "0.11.0"
-  #   build-packages: 
-  #     - python3-vcstool
-  #   stage-packages: 
-  #     - stm32flash
-  #     - libusb-1.0-0
-  #     - usbutils
-  #   override-pull: |
-  #     craftctl default
-
-  #     vcs import $CRAFT_PART_SRC < $CRAFT_PART_SRC/rosbot_xl/rosbot_xl_hardware.repos
-  #     cp -r $CRAFT_PART_SRC/ros2_controllers/diff_drive_controller $CRAFT_PART_SRC/
-  #     cp -r $CRAFT_PART_SRC/ros2_controllers/imu_sensor_broadcaster $CRAFT_PART_SRC/
-  #     rm -rf $CRAFT_PART_SRC/ros2_controllers
-  #     rm -r $CRAFT_PART_SRC/rosbot_xl_gazebo
-  #     # Ignore so that rosdep doesn't pull deps
-  #     # and colcon doesn't build
-  #     # touch $CRAFT_PART_SRC/rosbot_xl_gazebo/COLCON_IGNORE
-
-  #     # Set the snap version from the git tag
-  #     # The grade is set to 'stable' if the latest entry in the git history
-  #     # is the tag itself, otherwise set to devel
-  #     version="$(git describe --always --tags| sed -e 's/^v//;s/-/+git/;y/-/./')"
-  #     [ -n "$(echo $version | grep "+git")" ] && grade=devel || grade=stable
-  #     craftctl set version="$version"
-  #     craftctl set grade="$grade"
-
   rosbot-xl:
     plugin: colcon
-    source: https://github.com/husarion/rosbot_xl_manipulation_ros.git
-    # source-branch: "0.11.0"
+    source: https://github.com/husarion/rosbot_xl_ros.git
+    source-branch: "0.11.4"
     build-packages: 
       - python3-vcstool
     stage-packages: 
@@ -172,15 +142,11 @@ parts:
     override-pull: |
       craftctl default
 
-      vcs import $CRAFT_PART_SRC < $CRAFT_PART_SRC/rosbot_xl_manipulation/rosbot_xl_manipulation.repos
-      vcs import $CRAFT_PART_SRC < $CRAFT_PART_SRC/rosbot_xl_ros/rosbot_xl/rosbot_xl_hardware.repos
-      vcs import $CRAFT_PART_SRC < $CRAFT_PART_SRC/open_manipulator_x/open_manipulator_x.repos
-
+      vcs import $CRAFT_PART_SRC < $CRAFT_PART_SRC/rosbot_xl/rosbot_xl_hardware.repos
       cp -r $CRAFT_PART_SRC/ros2_controllers/diff_drive_controller $CRAFT_PART_SRC/
       cp -r $CRAFT_PART_SRC/ros2_controllers/imu_sensor_broadcaster $CRAFT_PART_SRC/
       rm -rf $CRAFT_PART_SRC/ros2_controllers
-      rm -r $CRAFT_PART_SRC/rosbot_xl_ros/rosbot_xl_gazebo
-      rm -r $CRAFT_PART_SRC/rosbot_xl_manipulation_gazebo
+      rm -r $CRAFT_PART_SRC/rosbot_xl_gazebo
       # Ignore so that rosdep doesn't pull deps
       # and colcon doesn't build
       # touch $CRAFT_PART_SRC/rosbot_xl_gazebo/COLCON_IGNORE
@@ -192,6 +158,40 @@ parts:
       [ -n "$(echo $version | grep "+git")" ] && grade=devel || grade=stable
       craftctl set version="$version"
       craftctl set grade="$grade"
+
+  # rosbot-xl:
+  #   plugin: colcon
+  #   source: https://github.com/husarion/rosbot_xl_manipulation_ros.git
+  #   # source-branch: "0.11.0"
+  #   build-packages: 
+  #     - python3-vcstool
+  #   stage-packages: 
+  #     - stm32flash
+  #     - libusb-1.0-0
+  #     - usbutils
+  #   override-pull: |
+  #     craftctl default
+
+  #     vcs import $CRAFT_PART_SRC < $CRAFT_PART_SRC/rosbot_xl_manipulation/rosbot_xl_manipulation.repos
+  #     vcs import $CRAFT_PART_SRC < $CRAFT_PART_SRC/rosbot_xl_ros/rosbot_xl/rosbot_xl_hardware.repos
+  #     vcs import $CRAFT_PART_SRC < $CRAFT_PART_SRC/open_manipulator_x/open_manipulator_x.repos
+
+  #     cp -r $CRAFT_PART_SRC/ros2_controllers/diff_drive_controller $CRAFT_PART_SRC/
+  #     cp -r $CRAFT_PART_SRC/ros2_controllers/imu_sensor_broadcaster $CRAFT_PART_SRC/
+  #     rm -rf $CRAFT_PART_SRC/ros2_controllers
+  #     rm -r $CRAFT_PART_SRC/rosbot_xl_ros/rosbot_xl_gazebo
+  #     rm -r $CRAFT_PART_SRC/rosbot_xl_manipulation_gazebo
+  #     # Ignore so that rosdep doesn't pull deps
+  #     # and colcon doesn't build
+  #     # touch $CRAFT_PART_SRC/rosbot_xl_gazebo/COLCON_IGNORE
+
+  #     # Set the snap version from the git tag
+  #     # The grade is set to 'stable' if the latest entry in the git history
+  #     # is the tag itself, otherwise set to devel
+  #     version="$(git describe --always --tags| sed -e 's/^v//;s/-/+git/;y/-/./')"
+  #     [ -n "$(echo $version | grep "+git")" ] && grade=devel || grade=stable
+  #     craftctl set version="$version"
+  #     craftctl set grade="$grade"
 
   teleop:
     plugin: nil
@@ -262,6 +262,13 @@ parts:
       - pyftdi
 
   # copy local scripts to the snap usr/bin
+  local-files-ros:
+    plugin: dump
+    source: snap/local/ros_common/
+    organize:
+      '*.sh': usr/bin/
+      '*.xml': usr/share/rosbot-xl/config/
+
   local-files:
     plugin: dump
     source: snap/local/
