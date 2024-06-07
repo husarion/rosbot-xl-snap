@@ -13,6 +13,7 @@ log_and_echo() {
 site_path="$SNAP/usr/local/www/"
 site_tmp_path="$SNAP_DATA/www/"
 layout="$(snapctl get webui.layout)"
+export UI_PORT="$(snapctl get webui.port)"
 log_and_echo "Using ${SNAP_COMMON}/foxglove-$layout.json"
 
 # Ensure the destination directory exists

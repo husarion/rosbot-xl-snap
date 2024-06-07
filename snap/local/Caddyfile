@@ -6,7 +6,7 @@
 # 	file_server
 # }
 
-:80 {
+:{$UI_PORT} {
 	# Enable HTTP/2 over clear text (h2c)
 	# protocols h2c
 
