@@ -27,13 +27,13 @@
 
 		handle @ipv6Client {
 			vars full_host [{http.request.host}]
-			redir /ui /?ds=foxglove-websocket&ds.url=ws%3A%2F%2F%5B{http.request.host}%5D%2Fws
+			redir /ui /?ds=foxglove-websocket&ds.url=ws%3A%2F%2F%5B{http.request.host}%5D%3A{http.request.port}%2Fws
 		}
 
 		# Handle all other requests (from non-IPv6 clients)
 		handle {
 			vars full_host {http.request.host}
-			redir /ui /?ds=foxglove-websocket&ds.url=ws%3A%2F%2F{http.request.host}%2Fws
+			redir /ui /?ds=foxglove-websocket&ds.url=ws%3A%2F%2F{http.request.host}%3A{http.request.port}%2Fws
 		}
 
 		# Handle all requests
