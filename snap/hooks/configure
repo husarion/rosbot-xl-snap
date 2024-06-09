@@ -56,3 +56,5 @@ for service in daemon web-ui web-ws; do
     log "Restarted ${SNAP_NAME}.${service}"
   fi
 done
+
+$SNAP/usr/bin/foxglove-set-namespace.sh
