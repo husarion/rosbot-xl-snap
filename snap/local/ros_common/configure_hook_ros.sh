@@ -63,11 +63,24 @@ if ! snapctl is-connected ${ROS_PLUG}; then
     exit 1
 fi
 
-# Create the ${SNAP_COMMON}/ros.env file and export variables
+# Create the ${SNAP_COMMON}/ros.env file and export variables (for bash session running ROS2)
 ROS_ENV_FILE="${SNAP_COMMON}/ros.env"
 echo "export ROS_DOMAIN_ID=${ROS_DOMAIN_ID}" > "${ROS_ENV_FILE}"
 echo "export ROS_LOCALHOST_ONLY=${ROS_LOCALHOST_ONLY}" >> "${ROS_ENV_FILE}"
 
 if [ "$TRANSPORT_SETTING" != "builtin" ]; then
   echo "export FASTRTPS_DEFAULT_PROFILES_FILE=${SNAP_COMMON}/${TRANSPORT_SETTING}.xml" >> "${ROS_ENV_FILE}"
+fi
+
+# Create the ${SNAP_COMMON}/ros.env file and export variables (for bash session running ROS2)
+ROS_SNAP_ARGS="${SNAP_COMMON}/ros_snap_args"
+
+
+NAMESPACE=$(snapctl get driver.namespace)
+
+# Check if the namespace is set and not empty
+if [ -n "$NAMESPACE" ]; then
+  echo "ros-domain-id=${ROS_DOMAIN_ID} ros-localhost-only=${ROS_LOCALHOST_ONLY} transport=${TRANSPORT_SETTING} driver.namespace=${NAMESPACE}" > "${ROS_SNAP_ARGS}"
+else
+  echo "ros-domain-id=${ROS_DOMAIN_ID} ros-localhost-only=${ROS_LOCALHOST_ONLY} transport=${TRANSPORT_SETTING} driver.namespace!" > "${ROS_SNAP_ARGS}"
 fi
