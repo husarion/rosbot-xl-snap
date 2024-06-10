@@ -62,3 +62,12 @@ if ! snapctl is-connected ${ROS_PLUG}; then
     log_and_echo "snap connect ${SNAP_NAME}:${ROS_PLUG} ${ROS_PLUG}:${ROS_PLUG}"
     exit 1
 fi
+
+# Create the ${SNAP_COMMON}/ros.env file and export variables
+ROS_ENV_FILE="${SNAP_COMMON}/ros.env"
+echo "export ROS_DOMAIN_ID=${ROS_DOMAIN_ID}" > "${ROS_ENV_FILE}"
+echo "export ROS_LOCALHOST_ONLY=${ROS_LOCALHOST_ONLY}" >> "${ROS_ENV_FILE}"
+
+if [ "$TRANSPORT_SETTING" != "builtin" ]; then
+  echo "export FASTRTPS_DEFAULT_PROFILES_FILE=${SNAP_COMMON}/${TRANSPORT_SETTING}.xml" >> "${ROS_ENV_FILE}"
+fi
