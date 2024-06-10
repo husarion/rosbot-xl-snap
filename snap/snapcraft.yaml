@@ -100,11 +100,11 @@ apps:
     command: usr/bin/stop_launcher.sh
 
   reset-stm32:
-    command: usr/bin/reset_stm32.py
+    command: usr/bin/reset_stm32_launcher.sh
     plugs: [raw-usb, network-bind]
 
   config-ftdi:
-    command: usr/bin/ftdi-eeprom-conf.py
+    command: usr/bin/ftdi_eeprom_conf_launcher.sh
     plugs: [raw-usb, network-bind]
 
   web-ui:

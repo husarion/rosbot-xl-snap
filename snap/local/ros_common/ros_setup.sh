@@ -1,10 +1,6 @@
-#!/usr/bin/bash -e
+#!/bin/bash -e
 
-log() {
-    local message="$1"
-    # Log the message with logger
-    logger -t "${SNAP_NAME}" "ros_setup: $message"
-}
+source $SNAP/usr/bin/utils.sh
 
 TRANSPORT="$(snapctl get transport)"
 # watch the log with: "journalctl -t ${SNAP_NAME}"

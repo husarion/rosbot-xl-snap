@@ -41,7 +41,7 @@
       "minLogLevel": 2
     },
     "Publish!3yfprcp": {
-      "topicName": "/cmd_vel",
+      "topicName": "{{env "NAMESPACE"}}/cmd_vel",
       "datatype": "geometry_msgs/msg/Twist",
       "buttonText": "Motors Test",
       "buttonTooltip": "",
@@ -131,17 +131,17 @@
         }
       },
       "topics": {
-        "/robot_description": {
+        "{{env "NAMESPACE"}}/robot_description": {
           "visible": true
         },
-        "/scan": {
+        "{{env "NAMESPACE"}}/scan": {
           "visible": false,
           "colorField": "intensity",
           "colorMode": "colormap",
           "colorMap": "turbo",
           "pointSize": 6
         },
-        "/scan_filtered": {
+        "{{env "NAMESPACE"}}/scan_filtered": {
           "visible": true,
           "colorField": "intensity",
           "colorMode": "colormap",
@@ -150,6 +150,22 @@
         }
       },
       "layers": {
+        "65f38642-dc67-4219-8e4d-bb0330368f80": {
+          "visible": true,
+          "frameLocked": true,
+          "label": "URDF",
+          "instanceId": "65f38642-dc67-4219-8e4d-bb0330368f80",
+          "layerId": "foxglove.Urdf",
+          "sourceType": "param",
+          "url": "",
+          "filePath": "",
+          "parameter": "{{env "NAMESPACE"}}/robot_state_publisher.robot_description",
+          "topic": "",
+          "framePrefix": "",
+          "displayMode": "auto",
+          "fallbackColor": "#ffffff",
+          "order": 1
+        },
         "eebc5132-8e96-40f6-a746-e61c0daaedab": {
           "visible": true,
           "frameLocked": true,
@@ -175,9 +191,9 @@
       },
       "publish": {
         "type": "point",
-        "poseTopic": "/move_base_simple/goal",
-        "pointTopic": "/clicked_point",
-        "poseEstimateTopic": "/initialpose",
+        "poseTopic": "{{env "NAMESPACE"}}/move_base_simple/goal",
+        "pointTopic": "{{env "NAMESPACE"}}/clicked_point",
+        "poseEstimateTopic": "{{env "NAMESPACE"}}/initialpose",
         "poseEstimateXDeviation": 0.5,
         "poseEstimateYDeviation": 0.5,
         "poseEstimateThetaDeviation": 0.26179939
@@ -234,20 +250,20 @@
       "layers": {},
       "publish": {
         "type": "point",
-        "poseTopic": "/move_base_simple/goal",
-        "pointTopic": "/clicked_point",
-        "poseEstimateTopic": "/initialpose",
+        "poseTopic": "{{env "NAMESPACE"}}/move_base_simple/goal",
+        "pointTopic": "{{env "NAMESPACE"}}/clicked_point",
+        "poseEstimateTopic": "{{env "NAMESPACE"}}/initialpose",
         "poseEstimateXDeviation": 0.5,
         "poseEstimateYDeviation": 0.5,
         "poseEstimateThetaDeviation": 0.26179939
       },
       "imageMode": {
-        "imageTopic": "/oak/rgb/image_raw/compressed",
-        "calibrationTopic": "/oak/rgb/camera_info"
+        "imageTopic": "{{env "NAMESPACE"}}/oak/rgb/image_raw/compressed",
+        "calibrationTopic": "{{env "NAMESPACE"}}/oak/rgb/camera_info"
       }
     },
     "Teleop!13emlz4": {
-      "topic": "/cmd_vel",
+      "topic": "{{env "NAMESPACE"}}/cmd_vel",
       "publishRate": 10,
       "upButton": {
         "field": "linear-x",

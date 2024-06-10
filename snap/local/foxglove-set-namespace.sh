@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 LAYOUT="$(snapctl get webui.layout)"
 NAMESPACE="$(snapctl get driver.namespace)"

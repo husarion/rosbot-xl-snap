@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash -e
 
 output="$(
 ros2 service call /get_cpu_id std_srvs/srv/Trigger

@@ -1,13 +1,7 @@
-#!/usr/bin/bash
+#!/bin/bash -e
 
 # Define a function to log and echo messages
-log_and_echo() {
-    local message="$1"
-    # Log the message with logger
-    logger -t "${SNAP_NAME}" "${SNAP_NAME}.flash: $message"
-    # Echo the message to standard error
-    echo >&2 "$message"
-}
+source $SNAP/usr/bin/utils.sh
 
 # Check if the script is being run as root
 if [ "$(id -u)" -ne 0 ]; then

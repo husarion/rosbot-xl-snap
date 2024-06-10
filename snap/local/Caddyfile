@@ -36,6 +36,12 @@
 			redir /ui /?ds=foxglove-websocket&ds.url=ws%3A%2F%2F{http.request.host}%3A{http.request.port}%2Fws
 		}
 
+		# Handle envs in foxglove templates
+		templates {
+			mime "text/html"
+			# mime "application/json" "text/plain" "text/html"
+		}
+
 		# Handle all requests
 		file_server
 	}

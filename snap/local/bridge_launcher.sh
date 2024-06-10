@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash -e
 
 # ros2 run foxglove_bridge foxglove_bridge --ros-args \
 # -p port:=8766 \

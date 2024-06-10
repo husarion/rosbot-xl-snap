@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/bash -e
 
 # The configure hook is called every time one the following actions happen:
 # - initial snap installation
@@ -6,19 +6,7 @@
 # - whenever the user runs snap set|unset to change a configuration option
 
 # Define a function to log and echo messages
-log_and_echo() {
-    local message="$1"
-    # Log the message with logger
-    logger -t "${SNAP_NAME}" "configure hook: $message"
-    # Echo the message to standard error
-    echo >&2 "$message"
-}
-
-log() {
-    local message="$1"
-    # Log the message with logger
-    logger -t "${SNAP_NAME}" "configure hook: $message"
-}
+source $SNAP/usr/bin/utils.sh
 
 # Make sure ROS_LOCALHOST_ONLY is valid
 OPT="ros-localhost-only"

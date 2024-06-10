@@ -1,19 +1,13 @@
-#!/usr/bin/bash
+#!/bin/bash -e
 
 # Define a function to log and echo messages
-log_and_echo() {
-    local message="$1"
-    # Log the message with logger
-    logger -t "${SNAP_NAME}" "caddy_launcher: $message"
-    # Echo the message to standard error
-    echo >&2 "$message"
-}
+source $SNAP/usr/bin/utils.sh
 
 # Define the source and destination directories
 site_path="$SNAP/usr/local/www/"
 site_tmp_path="$SNAP_DATA/www/"
-# layout="$(snapctl get webui.layout)"
-layout="layout"
+layout="$(snapctl get webui.layout)"
+# layout="layout"
 export UI_PORT="$(snapctl get webui.port)"
 log_and_echo "Using ${SNAP_COMMON}/foxglove-$layout.json"
 
@@ -35,5 +29,13 @@ echo "${index_html_content/"$replace_pattern"/$replace_value}" > $index_html_pat
 sed -i "s|<div id=\"root\"></div>|<script>\nlocalStorage.clear();sessionStorage.clear();\n</script>\n&|" $index_html_path
 
 # Define a function to log and echo messages
+# Retrieve the driver.namespace value
+namespace=$(snapctl get driver.namespace)
+
+# Check if the namespace is set and not empty
+if [ -n "$namespace" ]; then
+  # Set the environment variable
+  export NAMESPACE="/$namespace"
+fi
 caddy run --config $SNAP/usr/share/$SNAP_NAME/config/Caddyfile --adapter caddyfile
 

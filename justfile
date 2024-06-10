@@ -143,7 +143,7 @@ teleop:
     ros2 run teleop_twist_keyboard teleop_twist_keyboard # --ros-args -r __ns:=/robot
 
 iterate:
-    #!/bin/bash
+    #!/bin/bash -e
     start_time=$(date +%s)
     
     echo "Starting script..."

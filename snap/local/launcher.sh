@@ -1,10 +1,6 @@
-#!/usr/bin/bash
+#!/bin/bash -e
 
-log() {
-    local message="$1"
-    # Log the message with logger
-    logger -t "${SNAP_NAME}" "launcher: $message"
-}
+source $SNAP/usr/bin/utils.sh
 
 # Iterate over the snap parameters and retrieve their value.
 # If a value is set, it is forwarded to the launch file.
