@@ -2,6 +2,7 @@ name: rosbot-xl
 adopt-info: rosbot-xl
 license: Apache-2.0
 summary: A driver for ROSbot XL mobile robot
+icon: snap/gui/rosbot-xl.png
 description: |
   The **rosbot-xl** snap includes all the essential software required to operate the ROSbot XL, including the controller, robot state publisher, and more.
   
