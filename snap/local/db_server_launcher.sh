@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash
 
 # place in /usr/local/sbin
 
