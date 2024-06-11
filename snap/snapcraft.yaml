@@ -82,23 +82,24 @@ description: |
 
      ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args --remap __ns:=/${ROS_NAMESPACE}
 
-  **Notes**
+# Additional info:
+#   **Notes**
 
-  * `rosbot-xl.daemon` runs as the `root` user. To enable shared-memory communication (`ros-localhost-only=1` or `transport` set to `shm` or `builtin`), ensure the user on the host (or in Docker) is also `root`.
-  * To run the ROS 2 driver in the current terminal session (and enable shared memory communication with a non-root user):
+#   * `rosbot-xl.daemon` runs as the `root` user. To enable shared-memory communication (`ros-localhost-only=1` or `transport` set to `shm` or `builtin`), ensure the user on the host (or in Docker) is also `root`.
+#   * To run the ROS 2 driver in the current terminal session (and enable shared memory communication with a non-root user):
 
-     sudo rosbot-xl.stop
-     rosbot-xl
+#      sudo rosbot-xl.stop
+#      rosbot-xl
 
-  * Display logs from the ROS 2 node with:
+#   * Display logs from the ROS 2 node with:
 
-     sudo snap logs rosbot-xl.daemon
+#      sudo snap logs rosbot-xl.daemon
 
-  * Display logs from the snap logger with:
+#   * Display logs from the snap logger with:
      
-     journalctl -t rosbot-xl
+#      journalctl -t rosbot-xl
 
-  * `rosbot-xl` snap by default uses the following ports: `3000` by the safe-shutdown service, `8888` by microROS Agent, `8080` by a Web UI.
+#   * `rosbot-xl` snap by default uses the following ports: `3000` by the safe-shutdown service, `8888` by microROS Agent, `8080` by a Web UI.
 
 grade: stable
 confinement: strict
