@@ -72,6 +72,45 @@ if [ "$TRANSPORT_SETTING" != "builtin" ]; then
   echo "export FASTRTPS_DEFAULT_PROFILES_FILE=${SNAP_COMMON}/${TRANSPORT_SETTING}.xml" >> "${ROS_ENV_FILE}"
 fi
 
+# Define the path for the manage_ros_env.sh script
+MANAGE_SCRIPT="${SNAP_COMMON}/manage_ros_env.sh"
+
+# Create the manage_ros_env.sh script in ${SNAP_COMMON}
+cat << EOF > "${MANAGE_SCRIPT}"
+#!/bin/bash
+
+ROS_ENV_FILE="${SNAP_COMMON}/ros.env"
+SOURCE_LINE="source \${ROS_ENV_FILE}"
+
+add_source_to_bashrc() {
+  if ! grep -Fxq "\$SOURCE_LINE" ~/.bashrc; then
+    echo "\$SOURCE_LINE" >> ~/.bashrc
+    echo "Added '\$SOURCE_LINE' to ~/.bashrc"
+  else
+    echo "'\$SOURCE_LINE' is already in ~/.bashrc"
+  fi
+}
+
+remove_source_from_bashrc() {
+  sed -i "\|\$SOURCE_LINE|d" ~/.bashrc
+  echo "Removed '\$SOURCE_LINE' from ~/.bashrc"
+}
+
+case "\$1" in
+  remove)
+    remove_source_from_bashrc
+    ;;
+  add|*)
+    add_source_to_bashrc
+    ;;
+esac
+EOF
+
+# Make the manage_ros_env.sh script executable
+chmod +x "${MANAGE_SCRIPT}"
+
+echo "Created ${MANAGE_SCRIPT} and made it executable"
+
 # Create the ${SNAP_COMMON}/ros.env file and export variables (for bash session running ROS2)
 ROS_SNAP_ARGS="${SNAP_COMMON}/ros_snap_args"
 

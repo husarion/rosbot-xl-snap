@@ -3,22 +3,22 @@
     "Plot!1u5bb0v": {
       "paths": [
         {
-          "value": "/imu_broadcaster/imu.orientation.w",
+          "value": "{{env "NAMESPACE"}}/imu_broadcaster/imu.orientation.w",
           "enabled": true,
           "timestampMethod": "receiveTime"
         },
         {
-          "value": "/imu_broadcaster/imu.orientation.x",
+          "value": "{{env "NAMESPACE"}}/imu_broadcaster/imu.orientation.x",
           "enabled": true,
           "timestampMethod": "receiveTime"
         },
         {
-          "value": "/imu_broadcaster/imu.orientation.y",
+          "value": "{{env "NAMESPACE"}}/imu_broadcaster/imu.orientation.y",
           "enabled": true,
           "timestampMethod": "receiveTime"
         },
         {
-          "value": "/imu_broadcaster/imu.orientation.z",
+          "value": "{{env "NAMESPACE"}}/imu_broadcaster/imu.orientation.z",
           "enabled": true,
           "timestampMethod": "receiveTime"
         }
