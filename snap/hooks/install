@@ -12,9 +12,11 @@ snapctl set driver.include-camera-mount=True
 snapctl set driver.camera-model!
 snapctl set driver.lidar-model!
 snapctl set driver.namespace! # unset
+
 snapctl set webui.layout=default
 snapctl set webui.port=8080
-snapctl set serial-port="/dev/ttyUSBDB"
+
+snapctl set serial-port="auto"
 
 if ! snapctl is-connected raw-usb; then
   log "Plug 'raw-usb' isn't connected, please run:"
