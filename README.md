@@ -1,8 +1,8 @@
 # rosbot-xl-snap
 
-<div style="text-align: center;">
+<p align="center">
   <img src="snap/gui/rosbot-xl.png" width="150px">
-</div>
+</p>
 
 This snap packages the [`rosbot_xl_ros`](https://github.com/husarion/rosbot_xl_ros) package. It thus conveniently offers all the ROS 2 stack necessary to bring up the [ROSbot-XL](https://husarion.com/manuals/rosbot-xl/) robot, including IMU driver, robot state publisher, joint state publisher, controllers and more.
 
