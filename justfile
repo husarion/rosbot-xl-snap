@@ -141,3 +141,29 @@ teleop:
     #!/bin/bash
     # export FASTRTPS_DEFAULT_PROFILES_FILE=$(pwd)/shm-only.xml
     ros2 run teleop_twist_keyboard teleop_twist_keyboard # --ros-args -r __ns:=/robot
+
+iterate:
+    #!/bin/bash -e
+    start_time=$(date +%s)
+    
+    echo "Starting script..."
+
+    sudo snap remove rosbot-xl
+    sudo rm -rf squashfs-root/
+    sudo rm -rf rosbot-xl*.snap
+    export SNAPCRAFT_ENABLE_EXPERIMENTAL_EXTENSIONS=1
+    snapcraft clean
+    snapcraft
+    unsquashfs rosbot-xl*.snap
+    sudo snap try squashfs-root/
+    sudo snap connect rosbot-xl:raw-usb
+    sudo snap connect rosbot-xl:shm-plug rosbot-xl:shm-slot
+
+    end_time=$(date +%s)
+    duration=$(( end_time - start_time ))
+
+    hours=$(( duration / 3600 ))
+    minutes=$(( (duration % 3600) / 60 ))
+    seconds=$(( duration % 60 ))
+
+    printf "Script completed in %02d:%02d:%02d (hh:mm:ss)\n" $hours $minutes $seconds

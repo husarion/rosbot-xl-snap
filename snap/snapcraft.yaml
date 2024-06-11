@@ -100,11 +100,11 @@ apps:
     command: usr/bin/stop_launcher.sh
 
   reset-stm32:
-    command: usr/bin/reset_stm32.py
+    command: usr/bin/reset_stm32_launcher.sh
     plugs: [raw-usb, network-bind]
 
   config-ftdi:
-    command: usr/bin/ftdi-eeprom-conf.py
+    command: usr/bin/ftdi_eeprom_conf_launcher.sh
     plugs: [raw-usb, network-bind]
 
   web-ui:
@@ -245,6 +245,22 @@ parts:
       - ros-humble-nav2-msgs
       - ros-humble-tf2-msgs
       - ros-humble-robot-localization
+
+  yq:
+    plugin: nil
+    override-build: |
+      craftctl default
+
+      YQ_VERSION="v4.35.1"
+      TARGETARCH=$CRAFT_ARCH_BUILD_FOR
+      curl -L "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${TARGETARCH}" -o $CRAFT_PART_BUILD/yq
+    override-prime: |
+      craftctl default
+    
+      cp $CRAFT_PART_BUILD/yq $CRAFT_PRIME/usr/bin/yq
+      chmod +x $CRAFT_PRIME/usr/bin/yq
+    build-packages:
+      - curl
 
   db-server:
     plugin: nil

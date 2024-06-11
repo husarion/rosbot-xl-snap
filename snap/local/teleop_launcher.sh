@@ -1,7 +1,7 @@
-#!/usr/bin/bash
+#!/bin/bash -e
 
 # Retrieve the namespace using snapctl
-NAMESPACE="$(snapctl get namespace)"
+NAMESPACE="$(snapctl get driver.namespace)"
 
 # Check if NAMESPACE is not set or is empty
 if [ -z "$NAMESPACE" ]; then

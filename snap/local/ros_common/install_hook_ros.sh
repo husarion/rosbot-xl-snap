@@ -1,12 +1,7 @@
-#!/bin/sh -e
+#!/bin/bash -e
 
 # Define a function to log messages
-log() {
-  local message="$1"
-  # Log the message with logger
-  logger -t "${SNAP_NAME}" "install hook: $message"
-}
-
+source $SNAP/usr/bin/utils.sh
 
 snapctl set transport="udp"
 snapctl set ros-localhost-only=0

@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/bash -e
 
 # The configure hook is called every time one the following actions happen:
 # - initial snap installation
@@ -6,19 +6,7 @@
 # - whenever the user runs snap set|unset to change a configuration option
 
 # Define a function to log and echo messages
-log_and_echo() {
-    local message="$1"
-    # Log the message with logger
-    logger -t "${SNAP_NAME}" "configure hook: $message"
-    # Echo the message to standard error
-    echo >&2 "$message"
-}
-
-log() {
-    local message="$1"
-    # Log the message with logger
-    logger -t "${SNAP_NAME}" "configure hook: $message"
-}
+source $SNAP/usr/bin/utils.sh
 
 # Make sure ROS_LOCALHOST_ONLY is valid
 OPT="ros-localhost-only"
@@ -74,3 +62,66 @@ if ! snapctl is-connected ${ROS_PLUG}; then
     log_and_echo "snap connect ${SNAP_NAME}:${ROS_PLUG} ${ROS_PLUG}:${ROS_PLUG}"
     exit 1
 fi
+
+# Create the ${SNAP_COMMON}/ros.env file and export variables (for bash session running ROS2)
+ROS_ENV_FILE="${SNAP_COMMON}/ros.env"
+
+# Create the ${SNAP_COMMON}/ros.env file and export variables (for bash session running ROS2)
+ROS_SNAP_ARGS="${SNAP_COMMON}/ros_snap_args"
+
+echo "export ROS_DOMAIN_ID=${ROS_DOMAIN_ID}" > "${ROS_ENV_FILE}"
+echo "export ROS_LOCALHOST_ONLY=${ROS_LOCALHOST_ONLY}" >> "${ROS_ENV_FILE}"
+
+NAMESPACE=$(snapctl get driver.namespace)
+
+# Check if the namespace is set and not empty
+if [ -n "$NAMESPACE" ]; then
+  echo "ros-domain-id=${ROS_DOMAIN_ID} ros-localhost-only=${ROS_LOCALHOST_ONLY} transport=${TRANSPORT_SETTING} driver.namespace=${NAMESPACE}" > "${ROS_SNAP_ARGS}"
+  echo "export ROS_NAMESPACE=${NAMESPACE}" >> "${ROS_ENV_FILE}"
+else
+  echo "ros-domain-id=${ROS_DOMAIN_ID} ros-localhost-only=${ROS_LOCALHOST_ONLY} transport=${TRANSPORT_SETTING} driver.namespace!" > "${ROS_SNAP_ARGS}"
+fi
+
+if [ "$TRANSPORT_SETTING" != "builtin" ]; then
+  echo "export FASTRTPS_DEFAULT_PROFILES_FILE=${SNAP_COMMON}/${TRANSPORT_SETTING}.xml" >> "${ROS_ENV_FILE}"
+fi
+
+# Define the path for the manage_ros_env.sh script
+MANAGE_SCRIPT="${SNAP_COMMON}/manage_ros_env.sh"
+
+# Create the manage_ros_env.sh script in ${SNAP_COMMON}
+cat << EOF > "${MANAGE_SCRIPT}"
+#!/bin/bash
+
+ROS_ENV_FILE="${SNAP_COMMON}/ros.env"
+SOURCE_LINE="source \${ROS_ENV_FILE}"
+
+add_source_to_bashrc() {
+  if ! grep -Fxq "\$SOURCE_LINE" ~/.bashrc; then
+    echo "\$SOURCE_LINE" >> ~/.bashrc
+    echo "Added '\$SOURCE_LINE' to ~/.bashrc"
+  else
+    echo "'\$SOURCE_LINE' is already in ~/.bashrc"
+  fi
+}
+
+remove_source_from_bashrc() {
+  sed -i "\|\$SOURCE_LINE|d" ~/.bashrc
+  echo "Removed '\$SOURCE_LINE' from ~/.bashrc"
+}
+
+case "\$1" in
+  remove)
+    remove_source_from_bashrc
+    ;;
+  add|*)
+    add_source_to_bashrc
+    ;;
+esac
+EOF
+
+# Make the manage_ros_env.sh script executable
+chmod +x "${MANAGE_SCRIPT}"
+
+echo "Created ${MANAGE_SCRIPT} and made it executable"
+

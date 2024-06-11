@@ -25,7 +25,8 @@ def generate_launch_description():
         parameters=[{
             'port': 8765,
             'address': '127.0.0.1',
-            'capabilities': ['clientPublish', 'connectionGraph', 'assets']
+            'capabilities': ['clientPublish', 'parameters', 'parametersSubscribe', 'services', 'connectionGraph', 'assets']
+            # 'capabilities': ['clientPublish', 'connectionGraph', 'assets']
         }],
         output='screen'
     )
