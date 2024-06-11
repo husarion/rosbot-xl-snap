@@ -1,8 +1,6 @@
 # rosbot-xl-snap
 
-This snap packages the [`rosbot_xl_ros`](https://github.com/husarion/rosbot_xl_ros) package.
-It thus conveniently offers all the ROS 2 stack necessary to bring up the [ROSbot-XL](https://husarion.com/manuals/rosbot-xl/) robot,
-including IMU driver, robot state publisher, joint state publisher, controllers and more.
+This snap packages the [`rosbot_xl_ros`](https://github.com/husarion/rosbot_xl_ros) package. It thus conveniently offers all the ROS 2 stack necessary to bring up the [ROSbot-XL](https://husarion.com/manuals/rosbot-xl/) robot, including IMU driver, robot state publisher, joint state publisher, controllers and more.
 
 [![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/rosbot-xl)
 

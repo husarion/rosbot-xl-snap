@@ -1,27 +1,103 @@
 name: rosbot-xl
 adopt-info: rosbot-xl
 license: Apache-2.0
-summary: The rosbot-xl
+summary: A driver for ROSbot XL mobile robot
 description: |
-  The rosbot-xl snap contains all the necessary software to bring the robot up
-  such as controller, robot state publisher etc.
+  The **rosbot-xl** snap includes all the essential software required to operate the ROSbot XL, including the controller, robot state publisher, and more.
+  
+  **Installation**
 
-  It offers the following parameters,
+  To install this snap on the Single Board Computer (SBC) within the ROSbot XL chassis, follow these steps:
 
-  - ros-domain-id
-  - ros-localhost-only
-  - fastdds-default-profiles-file
-  - transport
-  - serial-port
-  - driver.namespace
-  - driver.mecanum
-  - driver.include-camera-mount
-  - driver.camera-model
-  - driver.lidar-model
+  1. Connect the SBC to the Digital Board inside ROSbot XL using an Ethernet cable.
+  2. Configure the Ethernet Interface with the static IP address `192.168.77.2` (port `8888` on this IP is used by the STM32F4 microcontroller).
+  3. Run the following command to install the snap:
 
-  which can be set as follows, e.g.,
+     snap install rosbot-xl
 
-    snap set rosbot-xl driver.mecanum=True
+  **Parameters**
+
+  The snap provides the following configurable parameters (`param name`: `default value`):
+
+  * `driver`: `{...}`
+  * `ros-domain-id`: `0` - Sets the `ROS_DOMAIN_ID` environment variable for the ROS driver.
+  * `ros-localhost-only`: `0` - Sets the `ROS_LOCALHOST_ONLY` environment variable for the ROS driver.
+  * `serial-port`: `auto` - Configures the serial port for firmware updates (e.g., `/dev/ttyUSB0`), or set it to `auto`.
+  * `transport`: `udp` - Configures DDS transport. Options are `udp`, `shm`, `builtin`. Corresponding DDS XML files can be found in the `/var/snap/rosbot-xl/common` directory (custom FastDDS setups can also be created here).
+  * `webui`: `{...}`
+
+  The `driver` parameter is a dictionary containing the following keys for a ROS 2 driver:
+
+  * `driver.namespace`: `(unset)` - Namespace for all topics and transforms.
+  * `driver.mecanum`: `True` - Enables the mecanum drive controller; otherwise, uses the differential drive controller.
+  * `driver.include-camera-mount`: `True` - Includes the camera mount in the robot URDF.
+  * `driver.camera-model`: `(unset)` - Adds the camera model to the robot URDF.
+  * `driver.lidar-model`: `(unset)` - Adds the LIDAR model to the robot URDF.
+
+  The `webui` parameter is a dictionary containing the following keys for the Web UI:
+
+  * `webui.layout`: `sensors` - Specifies the layout for the Web UI. Available `*.sjson` layout files can be found in the `/var/snap/rosbot-xl/common` directory (custom layouts can also be created here).
+  * `webui.port`: `8080` - Specifies the port for the built-in web server hosting the Web UI.
+
+  To set parameters, use the snap set command, e.g.,
+
+     snap set rosbot-xl driver.mecanum=True
+
+  **Available Apps (Main)**
+
+  * `rosbot-xl.flash` - Flash firmware for the STM32F4 microcontroller.
+  * `rosbot-xl.start` - Start the daemon running the ROSbot XL ROS 2 driver.
+  * `rosbot-xl.stop` - Stop the daemon running the ROSbot XL ROS 2 driver.
+  * `rosbot-xl.start-web-ui` - Start the daemon running the Web UI (available at `http://<ROBOT_IP>:8080/ui` by default).
+  * `rosbot-xl.stop-web-ui` - Stop the daemon running the Web UI.
+  * `rosbot-xl.teleop` - Run the `teleop_twist_keyboard` node to control the robot from a terminal.
+
+  **Auxiliary Apps**
+
+  * `rosbot-xl.config-ftdi` - Set up the CBUS pins in the FTDI chip (used with RST and BOOT0 pins in STM32); needs to be done only once.
+  * `rosbot-xl.print-serial-number` - Print the CPU ID and serial number of ROSbot XL.
+  * `rosbot-xl.reset-stm32` - Reset the STM32F4 microcontroller.
+
+  **Working with ROS Parameters**
+
+  For multiple snaps running ROS 2 or host-snap-Docker communication, useful files and scripts are available in `/var/snap/rosbot-xl/common/`.
+
+  Example usage:
+
+     # Set parameters in the rosbot-xl snap
+     sudo snap set rosbot-xl transport=udp ros-domain-id=123 driver.namespace=abc
+
+     # Mirror the setup for other ROS 2 snaps
+     sudo snap set husarion-depthai $(cat /var/snap/rosbot-xl/common/ros_snap_args)
+     sudo snap set husarion-rplidar $(cat /var/snap/rosbot-xl/common/ros_snap_args)
+
+     # Set up the current shell with the same configurations
+     source /var/snap/rosbot-xl/common/ros.env
+
+     # Install configurations with
+     /var/snap/rosbot-xl/common/manage_ros_env.sh
+     # After changing rosbot-xl parameters, open a new terminal, or run:
+     source ~/.bashrc
+
+     ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args --remap __ns:=/${ROS_NAMESPACE}
+
+  **Notes**
+
+  * `rosbot-xl.daemon` runs as the `root` user. To enable shared-memory communication (`ros-localhost-only=1` or `transport` set to `shm` or `builtin`), ensure the user on the host (or in Docker) is also `root`.
+  * To run the ROS 2 driver in the current terminal session (and enable shared memory communication with a non-root user):
+
+     sudo rosbot-xl.stop
+     rosbot-xl
+
+  * Display logs from the ROS 2 node with:
+
+     sudo snap logs rosbot-xl.daemon
+
+  * Display logs from the snap logger with:
+     
+     journalctl -t rosbot-xl
+
+  * `rosbot-xl` snap by default uses the following ports: `3000` by the safe-shutdown service, `8888` by microROS Agent, `8080` by a Web UI.
 
 grade: stable
 confinement: strict
