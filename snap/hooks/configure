@@ -9,6 +9,51 @@ source $SNAP/usr/bin/utils.sh
 
 $SNAP/usr/bin/configure_hook_ros.sh
 
+# Make sure correct the camera-model is selected
+OPT="camera-model"
+VALUE="$(snapctl get driver.${OPT})"
+if [ -n "${VALUE}" ]; then
+  case "${VALUE}" in
+  "None") ;;
+  "intel_realsense_d435") ;;
+  "orbbec_astra") ;;
+  "stereolabs_zed") ;;
+  "stereolabs_zedm") ;;
+  "stereolabs_zed2") ;;
+  "stereolabs_zed2i") ;;
+  "stereolabs_zedx") ;;
+  "stereolabs_zedxm") ;;
+  *)
+    log_and_echo "'${VALUE}' is not a supported value for '${OPT}'." \
+      "Possible values are: None, intel_realsense_d435, orbbec_astra, \
+      stereolabs_zed, stereolabs_zedm, stereolabs_zed2, stereolabs_zed2i, \
+      stereolabs_zedx, stereolabs_zedxm'"
+    exit 1
+    ;;
+  esac
+fi
+
+# Make sure correct the camera-model is selected
+OPT="lidar-model"
+VALUE="$(snapctl get driver.${OPT})"
+if [ -n "${VALUE}" ]; then
+  case "${VALUE}" in
+  "None") ;;
+  "slamtec_rplidar_a2") ;;
+  "slamtec_rplidar_a3") ;;
+  "slamtec_rplidar_s1") ;;
+  "slamtec_rplidar_s2") ;;
+  "slamtec_rplidar_s3") ;;
+  "velodyne_puck") ;;
+  *)
+    log_and_echo "'${VALUE}' is not a supported value for '${OPT}'." \
+      "Possible values are: None, slamtec_rplidar_a2, slamtec_rplidar_a3, \
+      slamtec_rplidar_s1, slamtec_rplidar_s2, slamtec_rplidar_s3, velodyne_puck"
+    exit 1
+    ;;
+  esac
+fi
+
 # Make sure ROS 2 nodes parameters value is a boolean
 OPTS="mecanum include-camera-mount"
 for OPT in ${OPTS}; do
