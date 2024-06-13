@@ -8,6 +8,43 @@
 # Define a function to log and echo messages
 source $SNAP/usr/bin/utils.sh
 
+# Function to check the type of the provided XML file
+check_xml_profile_type() {
+    local xml_file="$1"
+
+    if [[ ! -f "$xml_file" ]]; then
+        log_and_echo "File '$xml_file' does not exist."
+        return 1
+    fi
+
+    local root_element
+    local namespace
+
+    # Extract the root element
+    root_element=$(yq '. | keys | .[1]' "$xml_file")
+
+    # Extract the namespace based on the root element
+    if [[ "$root_element" == "CycloneDDS" ]]; then
+        namespace=$(yq .CycloneDDS."+@xmlns" "$xml_file")
+    elif [[ "$root_element" == "profiles" ]]; then
+        namespace=$(yq .profiles."+@xmlns" "$xml_file")
+    else
+        namespace="unknown"
+    fi
+
+    # Remove quotes from the extracted values
+    root_element=${root_element//\"/}
+    namespace=${namespace//\"/}
+
+    if [[ "$root_element" == "profiles" ]] && [[ "$namespace" == "http://www.eprosima.com/XMLSchemas/fastRTPS_Profiles" ]]; then
+        echo "rmw_fastrtps_cpp"
+    elif [[ "$root_element" == "CycloneDDS" ]] && [[ "$namespace" == "https://cdds.io/config" ]]; then
+        echo "rmw_cyclonedds_cpp"
+    else
+        exit 1
+    fi
+}
+
 # Make sure ROS_LOCALHOST_ONLY is valid
 OPT="ros-localhost-only"
 ROS_LOCALHOST_ONLY="$(snapctl get ${OPT})"
@@ -36,14 +73,14 @@ OPT="transport"
 TRANSPORT_SETTING="$(snapctl get ${OPT})"
 
 # Only exit with status 1 if conditions are not met
-if [ "$TRANSPORT_SETTING" != "builtin" ] && [ ! -f "${SNAP_COMMON}/${TRANSPORT_SETTING}.xml" ]; then
+if [ "$TRANSPORT_SETTING" != "rmw_fastrtps_cpp" ] && [ "$TRANSPORT_SETTING" != "rmw_cyclonedds_cpp" ] && [ ! -f "${SNAP_COMMON}/${TRANSPORT_SETTING}.xml" ]; then
   log_and_echo "'${SNAP_COMMON}/${TRANSPORT_SETTING}.xml' does not exist."
   exit 1
 fi
 
-if [ "$TRANSPORT_SETTING" = "builtin" ] || [ "$TRANSPORT_SETTING" = "shm" ]; then
+if [ "$TRANSPORT_SETTING" = "rmw_fastrtps_cpp" ] || [ "$TRANSPORT_SETTING" = "shm" ]; then
   if ! snapctl is-connected shm-plug; then
-    log_and_echo "to use 'builtin' and 'shm' tranport shm-plug need to be connected, please run:"
+    log_and_echo "to use 'rmw_fastrtps_cpp' and 'shm' tranport shm-plug need to be connected, please run:"
     log_and_echo "sudo snap connect ${SNAP_NAME}:shm-plug ${SNAP_NAME}:shm-slot"
     exit 1
   fi
@@ -78,8 +115,25 @@ else
   echo "unset ROS_NAMESPACE" >> "${ROS_ENV_FILE}"
 fi
 
-if [ "$TRANSPORT_SETTING" != "builtin" ]; then
-  echo "export FASTRTPS_DEFAULT_PROFILES_FILE=${SNAP_COMMON}/${TRANSPORT_SETTING}.xml" >> "${ROS_ENV_FILE}"
+# Check the transport setting and export the appropriate environment variable
+if [ "$TRANSPORT_SETTING" != "rmw_fastrtps_cpp" ] && [ "$TRANSPORT_SETTING" != "rmw_cyclonedds_cpp" ]; then
+    profile_type=$(check_xml_profile_type "${SNAP_COMMON}/${TRANSPORT_SETTING}.xml")
+    if [[ "$profile_type" == "rmw_fastrtps_cpp" ]]; then
+        echo "unset CYCLONEDDS_URI" >> "${ROS_ENV_FILE}"
+        echo "export RMW_IMPLEMENTATION=${profile_type}" >> "${ROS_ENV_FILE}"
+        echo "export FASTRTPS_DEFAULT_PROFILES_FILE=${SNAP_COMMON}/${TRANSPORT_SETTING}.xml" >> "${ROS_ENV_FILE}"
+    elif [[ "$profile_type" == "rmw_cyclonedds_cpp" ]]; then
+        echo "unset FASTRTPS_DEFAULT_PROFILES_FILE" >> "${ROS_ENV_FILE}"
+        echo "export RMW_IMPLEMENTATION=${profile_type}" >> "${ROS_ENV_FILE}"
+        echo "export CYCLONEDDS_URI=file://${SNAP_COMMON}/${TRANSPORT_SETTING}.xml" >> "${ROS_ENV_FILE}"
+    else
+        log_and_echo "'${TRANSPORT_SETTING}' is not a supported value for '${OPT}'. Possible values are: rmw_fastrtps_cpp, rmw_cyclonedds_cpp, or a valid profile XML file."
+        exit 1
+    fi
+elif [ "$TRANSPORT_SETTING" == "rmw_fastrtps_cpp" ] || [ "$TRANSPORT_SETTING" == "rmw_cyclonedds_cpp" ]; then
+  echo "unset CYCLONEDDS_URI" >> "${ROS_ENV_FILE}"
+  echo "unset FASTRTPS_DEFAULT_PROFILES_FILE" >> "${ROS_ENV_FILE}"
+  echo "export RMW_IMPLEMENTATION=${TRANSPORT_SETTING}" >> "${ROS_ENV_FILE}"
 fi
 
 # Define the path for the manage_ros_env.sh script

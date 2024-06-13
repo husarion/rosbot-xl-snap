@@ -20,3 +20,4 @@ log() {
 is_integer() {
   expr "$1" : '-\?[0-9][0-9]*$' >/dev/null 2>&1
 }
+

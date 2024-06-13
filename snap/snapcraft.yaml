@@ -37,7 +37,7 @@ description: |
 
   The `webui` parameter is a dictionary containing the following keys for the Web UI:
 
-  * `webui.layout`: `sensors` - Specifies the layout for the Web UI. Available `*.json` layout files can be found in the `/var/snap/rosbot-xl/common` directory (custom layouts can also be created here).
+  * `webui.layout`: `default` - Specifies the layout for the Web UI. Available `*.json` layout files can be found in the `/var/snap/rosbot-xl/common` directory (custom layouts can also be created here).
   * `webui.port`: `8080` - Specifies the port for the built-in web server hosting the Web UI.
 
   To set parameters, use the snap set command, e.g.,
@@ -217,6 +217,7 @@ parts:
       - stm32flash
       - libusb-1.0-0
       - usbutils
+      - ros-humble-rmw-cyclonedds-cpp
     override-pull: |
       craftctl default
 
