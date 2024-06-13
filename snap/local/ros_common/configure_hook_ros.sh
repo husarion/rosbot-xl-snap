@@ -16,8 +16,7 @@ if [ -n "${ROS_LOCALHOST_ONLY}" ]; then
   1) ;;
   0) ;;
   *)
-    log_and_echo "'${ROS_LOCALHOST_ONLY}' is not a supported value for '${OPT}'." \
-      "Possible values are 0 or 1."
+    log_and_echo "'${ROS_LOCALHOST_ONLY}' is not a supported value for '${OPT}'. Possible values are 0 or 1."
     exit 1
     ;;
   esac
@@ -26,10 +25,6 @@ fi
 # Make sure ROS_DOMAIN_ID is valid
 OPT="ros-domain-id"
 ROS_DOMAIN_ID="$(snapctl get ${OPT})"
-
-is_integer() {
-  expr "$1" : '-\?[0-9][0-9]*$' >/dev/null 2>&1
-}
 
 if ! is_integer "${ROS_DOMAIN_ID}" || [ "${ROS_DOMAIN_ID}" -lt 0 ] || [ "${ROS_DOMAIN_ID}" -gt 232 ]; then
   log_and_echo "'${ROS_DOMAIN_ID}' is not a supported value for '${OPT}'. Possible values are integers between 0 and 232."
@@ -80,6 +75,7 @@ if [ -n "$NAMESPACE" ]; then
   echo "export ROS_NAMESPACE=${NAMESPACE}" >> "${ROS_ENV_FILE}"
 else
   echo "ros-domain-id=${ROS_DOMAIN_ID} ros-localhost-only=${ROS_LOCALHOST_ONLY} transport=${TRANSPORT_SETTING} driver.namespace!" > "${ROS_SNAP_ARGS}"
+  echo "unset ROS_NAMESPACE" >> "${ROS_ENV_FILE}"
 fi
 
 if [ "$TRANSPORT_SETTING" != "builtin" ]; then
@@ -122,6 +118,4 @@ EOF
 
 # Make the manage_ros_env.sh script executable
 chmod +x "${MANAGE_SCRIPT}"
-
-echo "Created ${MANAGE_SCRIPT} and made it executable"
 

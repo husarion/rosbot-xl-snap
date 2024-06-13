@@ -32,8 +32,8 @@ description: |
   * `driver.namespace`: `(unset)` - Namespace for all topics and transforms.
   * `driver.mecanum`: `True` - Enables the mecanum drive controller; otherwise, uses the differential drive controller.
   * `driver.include-camera-mount`: `True` - Includes the camera mount in the robot URDF.
-  * `driver.camera-model`: `(unset)` - Adds the camera model to the robot URDF.
-  * `driver.lidar-model`: `(unset)` - Adds the LIDAR model to the robot URDF.
+  * `driver.camera-model`: `None` - Adds the camera model to the robot URDF.
+  * `driver.lidar-model`: `None` - Adds the LIDAR model to the robot URDF.
 
   The `webui` parameter is a dictionary containing the following keys for the Web UI:
 
@@ -107,7 +107,7 @@ base: core22
 
 contact: https://github.com/husarion/rosbot-xl-snap/issues
 issues: https://github.com/husarion/rosbot-xl-snap/issues
-website: https://husarion.com/
+website: https://husarion.com/manuals/rosbot-xl/overview/
 
 architectures:
   - build-on: amd64

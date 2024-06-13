@@ -16,3 +16,7 @@ log() {
     # Log the message with logger
     logger -t "${SNAP_NAME}" "${script_name}: $message"
 }
+
+is_integer() {
+  expr "$1" : '-\?[0-9][0-9]*$' >/dev/null 2>&1
+}

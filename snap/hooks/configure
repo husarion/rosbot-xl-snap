@@ -9,48 +9,43 @@ source $SNAP/usr/bin/utils.sh
 
 $SNAP/usr/bin/configure_hook_ros.sh
 
-# Make sure correct the camera-model is selected
+# Check and validate the camera model
 OPT="camera-model"
 VALUE="$(snapctl get driver.${OPT})"
+
+# Define the valid options for camera model
+VALID_CAMERA_OPTIONS=("None" "intel_realsense_d435" "orbbec_astra" "stereolabs_zed" "stereolabs_zedm" "stereolabs_zed2" "stereolabs_zed2i" "stereolabs_zedx" "stereolabs_zedxm")
+
+# Join the valid camera options with newlines
+JOINED_CAMERA_OPTIONS=$(printf "%s\n" "${VALID_CAMERA_OPTIONS[@]}")
+
 if [ -n "${VALUE}" ]; then
   case "${VALUE}" in
-  "None") ;;
-  "intel_realsense_d435") ;;
-  "orbbec_astra") ;;
-  "stereolabs_zed") ;;
-  "stereolabs_zedm") ;;
-  "stereolabs_zed2") ;;
-  "stereolabs_zed2i") ;;
-  "stereolabs_zedx") ;;
-  "stereolabs_zedxm") ;;
-  *)
-    log_and_echo "'${VALUE}' is not a supported value for '${OPT}'." \
-      "Possible values are: None, intel_realsense_d435, orbbec_astra, \
-      stereolabs_zed, stereolabs_zedm, stereolabs_zed2, stereolabs_zed2i, \
-      stereolabs_zedx, stereolabs_zedxm'"
-    exit 1
-    ;;
+    "${VALID_CAMERA_OPTIONS[@]}") ;;
+    *)
+      log_and_echo "'${VALUE}' is not a supported value for '${OPT}'. Possible values are:\n${JOINED_CAMERA_OPTIONS}"
+      exit 1
+      ;;
   esac
 fi
 
 # Make sure correct the camera-model is selected
 OPT="lidar-model"
 VALUE="$(snapctl get driver.${OPT})"
+
+# Define the valid options as an array
+VALID_OPTIONS=("None" "slamtec_rplidar_a2" "slamtec_rplidar_a3" "slamtec_rplidar_s1" "slamtec_rplidar_s2" "slamtec_rplidar_s3" "velodyne_puck")
+
+# Join the valid options with a semicolon and space
+JOINED_OPTIONS=$(printf "%s\n" "${VALID_OPTIONS[@]}")
+
 if [ -n "${VALUE}" ]; then
   case "${VALUE}" in
-  "None") ;;
-  "slamtec_rplidar_a2") ;;
-  "slamtec_rplidar_a3") ;;
-  "slamtec_rplidar_s1") ;;
-  "slamtec_rplidar_s2") ;;
-  "slamtec_rplidar_s3") ;;
-  "velodyne_puck") ;;
-  *)
-    log_and_echo "'${VALUE}' is not a supported value for '${OPT}'." \
-      "Possible values are: None, slamtec_rplidar_a2, slamtec_rplidar_a3, \
-      slamtec_rplidar_s1, slamtec_rplidar_s2, slamtec_rplidar_s3, velodyne_puck"
-    exit 1
-    ;;
+    "${VALID_OPTIONS[@]}") ;;
+    *)
+      log_and_echo "'${VALUE}' is not a supported value for '${OPT}'. Possible values are:\n${JOINED_OPTIONS[*]}"
+      exit 1
+      ;;
   esac
 fi
 
@@ -63,13 +58,21 @@ for OPT in ${OPTS}; do
     "True") ;;
     "False") ;;
     *)
-      log_and_echo "configure hook: '${VALUE}' is not a supported value for ${OPT}." \
-        "Possible values are True or False."
+      log_and_echo "configure hook: '${VALUE}' is not a supported value for ${OPT}. Possible values are True or False."
       exit 1
       ;;
     esac
   fi
 done
+
+# Make sure the serial-port value is valid
+OPT="serial-port"
+VALUE="$(snapctl get ${OPT})"
+
+if [ "${VALUE}" != "auto" ] && [ ! -e "${VALUE}" ]; then
+  log_and_echo "'${VALUE}' is not a valid value for '${OPT}'. It must be 'auto' or a valid serial port in the /dev/ directory."
+  exit 1
+fi
 
 # Get the transport setting using snapctl
 OPT="webui.layout"
@@ -81,6 +84,15 @@ if [ ! -f "${SNAP_COMMON}/foxglove-${LAYOUT}.json" ]; then
   exit 1
 fi
 
+# Make sure WEBUI_PORT is valid
+OPT="webui.port"
+WEBUI_PORT="$(snapctl get ${OPT})"
+
+if ! is_integer "${WEBUI_PORT}" || [ "${WEBUI_PORT}" -lt 0 ] || [ "${WEBUI_PORT}" -gt 65535 ] || [ "${WEBUI_PORT}" -eq 3000 ] || [ "${WEBUI_PORT}" -eq 8888 ]; then
+  log_and_echo "'${WEBUI_PORT}' is not a supported value for '${OPT}'. Possible values are integers between 0 and 65535, excluding 3000 and 8888."
+  exit 1
+fi
+
 # restart services with new ROS 2 config
 for service in daemon web-ui web-ws; do
   if snapctl services ${SNAP_NAME}.${service} | grep -qw active; then
@@ -88,5 +100,3 @@ for service in daemon web-ui web-ws; do
     log "Restarted ${SNAP_NAME}.${service}"
   fi
 done
-
-# $SNAP/usr/bin/foxglove-set-namespace.sh
