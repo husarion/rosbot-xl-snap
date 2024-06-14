@@ -7,7 +7,7 @@ log_and_echo() {
     # Log the message with logger
     logger -t "${SNAP_NAME}" "${script_name}: $message"
     # Echo the message to standard error
-    echo >&2 "$message"
+    echo -e >&2 "$message"
 }
 
 log() {
@@ -16,3 +16,8 @@ log() {
     # Log the message with logger
     logger -t "${SNAP_NAME}" "${script_name}: $message"
 }
+
+is_integer() {
+  expr "$1" : '-\?[0-9][0-9]*$' >/dev/null 2>&1
+}
+

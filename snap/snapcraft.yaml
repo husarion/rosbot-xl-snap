@@ -24,7 +24,7 @@ description: |
   * `ros-domain-id`: `0` - Sets the `ROS_DOMAIN_ID` environment variable for the ROS driver.
   * `ros-localhost-only`: `0` - Sets the `ROS_LOCALHOST_ONLY` environment variable for the ROS driver.
   * `serial-port`: `auto` - Configures the serial port for firmware updates (e.g., `/dev/ttyUSB0`), or set it to `auto`.
-  * `transport`: `udp` - Configures DDS transport. Options are `udp`, `shm`, `builtin`. Corresponding DDS XML files can be found in the `/var/snap/rosbot-xl/common` directory (custom FastDDS setups can also be created here).
+  * `transport`: `udp` - Configures DDS transport. Options are `udp`, `shm`, `builtin` (or `rmw_fastrtps_cpp`), `rmw_cyclonedds_cpp`. Corresponding DDS XML files can be found in the `/var/snap/rosbot-xl/common` directory (custom FastDDS setups can also be created here).
   * `webui`: `{...}`
 
   The `driver` parameter is a dictionary containing the following keys for a ROS 2 driver:
@@ -32,12 +32,12 @@ description: |
   * `driver.namespace`: `(unset)` - Namespace for all topics and transforms.
   * `driver.mecanum`: `True` - Enables the mecanum drive controller; otherwise, uses the differential drive controller.
   * `driver.include-camera-mount`: `True` - Includes the camera mount in the robot URDF.
-  * `driver.camera-model`: `(unset)` - Adds the camera model to the robot URDF.
-  * `driver.lidar-model`: `(unset)` - Adds the LIDAR model to the robot URDF.
+  * `driver.camera-model`: `None` - Adds the camera model to the robot URDF.
+  * `driver.lidar-model`: `None` - Adds the LIDAR model to the robot URDF.
 
   The `webui` parameter is a dictionary containing the following keys for the Web UI:
 
-  * `webui.layout`: `sensors` - Specifies the layout for the Web UI. Available `*.json` layout files can be found in the `/var/snap/rosbot-xl/common` directory (custom layouts can also be created here).
+  * `webui.layout`: `default` - Specifies the layout for the Web UI. Available `*.json` layout files can be found in the `/var/snap/rosbot-xl/common` directory (custom layouts can also be created here).
   * `webui.port`: `8080` - Specifies the port for the built-in web server hosting the Web UI.
 
   To set parameters, use the snap set command, e.g.,
@@ -77,7 +77,6 @@ description: |
 
      # Install configurations with
      /var/snap/rosbot-xl/common/manage_ros_env.sh
-     # After changing rosbot-xl parameters, open a new terminal, or run:
      source ~/.bashrc
 
      ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args --remap __ns:=/${ROS_NAMESPACE}
@@ -107,7 +106,7 @@ base: core22
 
 contact: https://github.com/husarion/rosbot-xl-snap/issues
 issues: https://github.com/husarion/rosbot-xl-snap/issues
-website: https://husarion.com/
+website: https://husarion.com/manuals/rosbot-xl/overview/
 
 architectures:
   - build-on: amd64
@@ -210,13 +209,14 @@ parts:
   rosbot-xl:
     plugin: colcon
     source: https://github.com/husarion/rosbot_xl_ros.git
-    source-branch: "0.11.4"
+    source-branch: "0.11.5"
     build-packages: 
       - python3-vcstool
     stage-packages: 
       - stm32flash
       - libusb-1.0-0
       - usbutils
+      - ros-humble-rmw-cyclonedds-cpp
     override-pull: |
       craftctl default
 

@@ -9,8 +9,8 @@ $SNAP/usr/bin/install_hook_ros.sh
 # Default configuration values is left to the launch file.
 snapctl set driver.mecanum=True
 snapctl set driver.include-camera-mount=True
-snapctl set driver.camera-model!
-snapctl set driver.lidar-model!
+snapctl set driver.camera-model=None
+snapctl set driver.lidar-model=None
 snapctl set driver.namespace! # unset
 
 snapctl set webui.layout=default

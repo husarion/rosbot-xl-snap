@@ -167,3 +167,8 @@ iterate:
     seconds=$(( duration % 60 ))
 
     printf "Script completed in %02d:%02d:%02d (hh:mm:ss)\n" $hours $minutes $seconds
+
+remove-logs:
+    #!/bin/bash
+    sudo rm -rf /var/log/journal/*
+    sudo systemctl restart systemd-journald

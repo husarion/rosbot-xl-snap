@@ -10,12 +10,10 @@ LAUNCH_OPTIONS=""
 for OPTION in ${OPTIONS}; do
   VALUE="$(snapctl get driver.${OPTION})"
   if [ -n "${VALUE}" ]; then
-    LAUNCH_OPTIONS+="${OPTION}:=${VALUE} "
+    OPTION_WITH_UNDERSCORE=$(echo ${OPTION} | tr - _)
+    LAUNCH_OPTIONS+="${OPTION_WITH_UNDERSCORE}:=${VALUE} "
   fi
 done
-
-# Replace '-' with '_'
-LAUNCH_OPTIONS=$(echo ${LAUNCH_OPTIONS} | tr - _)
 
 if [ "${LAUNCH_OPTIONS}" ]; then
   # watch the log with: "journalctl -t rosbot-xl"
