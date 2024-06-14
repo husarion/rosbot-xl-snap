@@ -72,6 +72,12 @@ fi
 OPT="transport"
 TRANSPORT_SETTING="$(snapctl get ${OPT})"
 
+# Check if TRANSPORT_SETTING is "builtin"
+if [ "$TRANSPORT_SETTING" == "builtin" ]; then
+  # Change the value to "rmw_fastrtps_cpp"
+  TRANSPORT_SETTING="rmw_fastrtps_cpp"
+fi
+
 # Only exit with status 1 if conditions are not met
 if [ "$TRANSPORT_SETTING" != "rmw_fastrtps_cpp" ] && [ "$TRANSPORT_SETTING" != "rmw_cyclonedds_cpp" ] && [ ! -f "${SNAP_COMMON}/${TRANSPORT_SETTING}.xml" ]; then
   log_and_echo "'${SNAP_COMMON}/${TRANSPORT_SETTING}.xml' does not exist."

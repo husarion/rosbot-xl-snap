@@ -9,61 +9,40 @@ source $SNAP/usr/bin/utils.sh
 
 $SNAP/usr/bin/configure_hook_ros.sh
 
-# Check and validate the camera model
-OPT="camera-model"
-VALUE="$(snapctl get driver.${OPT})"
+# Function to validate the option values
+validate_option() {
+  local OPT=$1
+  local VALID_OPTIONS=("${!2}")
 
-# Define the valid options for camera model
-VALID_CAMERA_OPTIONS=("None" "intel_realsense_d435" "orbbec_astra" "stereolabs_zed" "stereolabs_zedm" "stereolabs_zed2" "stereolabs_zed2i" "stereolabs_zedx" "stereolabs_zedxm")
-
-# Join the valid camera options with newlines
-JOINED_CAMERA_OPTIONS=$(printf "%s\n" "${VALID_CAMERA_OPTIONS[@]}")
-
-if [ -n "${VALUE}" ]; then
-  case "${VALUE}" in
-    "${VALID_CAMERA_OPTIONS[@]}") ;;
-    *)
-      log_and_echo "'${VALUE}' is not a supported value for '${OPT}'. Possible values are:\n${JOINED_CAMERA_OPTIONS}"
-      exit 1
-      ;;
-  esac
-fi
-
-# Make sure correct the camera-model is selected
-OPT="lidar-model"
-VALUE="$(snapctl get driver.${OPT})"
-
-# Define the valid options as an array
-VALID_OPTIONS=("None" "slamtec_rplidar_a2" "slamtec_rplidar_a3" "slamtec_rplidar_s1" "slamtec_rplidar_s2" "slamtec_rplidar_s3" "velodyne_puck")
-
-# Join the valid options with a semicolon and space
-JOINED_OPTIONS=$(printf "%s\n" "${VALID_OPTIONS[@]}")
-
-if [ -n "${VALUE}" ]; then
-  case "${VALUE}" in
-    "${VALID_OPTIONS[@]}") ;;
-    *)
-      log_and_echo "'${VALUE}' is not a supported value for '${OPT}'. Possible values are:\n${JOINED_OPTIONS[*]}"
-      exit 1
-      ;;
-  esac
-fi
-
-# Make sure ROS 2 nodes parameters value is a boolean
-OPTS="mecanum include-camera-mount"
-for OPT in ${OPTS}; do
   VALUE="$(snapctl get driver.${OPT})"
+
+  # Create an associative array to check valid options
+  declare -A valid_options_map
+  for option in "${VALID_OPTIONS[@]}"; do
+    valid_options_map["$option"]=1
+  done
+
+  # Join the valid options with newlines
+  JOINED_OPTIONS=$(printf "%s\n" "${VALID_OPTIONS[@]}")
+
   if [ -n "${VALUE}" ]; then
-    case "${VALUE}" in
-    "True") ;;
-    "False") ;;
-    *)
-      log_and_echo "configure hook: '${VALUE}' is not a supported value for ${OPT}. Possible values are True or False."
+    if [[ -z "${valid_options_map[$VALUE]}" ]]; then
+      log_and_echo "'${VALUE}' is not a supported value for '${OPT}'. Possible values are:\n${JOINED_OPTIONS}"
       exit 1
-      ;;
-    esac
+    fi
   fi
-done
+}
+
+# Define the valid options for camera model and lidar model
+VALID_CAMERA_OPTIONS=("None" "intel_realsense_d435" "orbbec_astra" "stereolabs_zed" "stereolabs_zedm" "stereolabs_zed2" "stereolabs_zed2i" "stereolabs_zedx" "stereolabs_zedxm")
+VALID_LIDAR_OPTIONS=("None" "slamtec_rplidar_a2" "slamtec_rplidar_a3" "slamtec_rplidar_s1" "slamtec_rplidar_s2" "slamtec_rplidar_s3" "velodyne_puck")
+VALID_BOOLEAN_OPTIONS=("True" "False")
+
+# Validate parameters with array of possible values
+validate_option "camera-model" VALID_CAMERA_OPTIONS[@]
+validate_option "lidar-model" VALID_LIDAR_OPTIONS[@]
+validate_option "mecanum" VALID_BOOLEAN_OPTIONS[@]
+validate_option "include-camera-mount" VALID_BOOLEAN_OPTIONS[@]
 
 # Make sure the serial-port value is valid
 OPT="serial-port"
