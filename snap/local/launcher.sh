@@ -22,3 +22,10 @@ fi
 
 # ros2 launch rosbot_xl_bringup combined.launch.py ${LAUNCH_OPTIONS}
 ros2 launch $SNAP/usr/bin/bringup/rosbot.launch.py ${LAUNCH_OPTIONS}
+
+# don't work with namespaces currently
+# ros2 launch $SNAP/usr/bin/bringup/rosbot-manipulator.launch.py ${LAUNCH_OPTIONS} \
+#   manipulator_usb_port:=/dev/ttyUSB2 \
+#   manipulator_baud_rate:=${MANIPULATOR_BAUDRATE:-1000000} \
+#   joy_servo_params_file:=$SNAP/usr/bin/joy_servo.yaml \
+#   antenna_rotation_angle:=${ANTENNA_ROTATION_ANGLE:--1.57}
