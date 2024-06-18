@@ -20,4 +20,5 @@ if [ "${LAUNCH_OPTIONS}" ]; then
   log "Running with options: ${LAUNCH_OPTIONS}"
 fi
 
-ros2 launch rosbot_xl_bringup combined.launch.py ${LAUNCH_OPTIONS}
+# ros2 launch rosbot_xl_bringup combined.launch.py ${LAUNCH_OPTIONS}
+ros2 launch $SNAP/usr/bin/bringup/rosbot.launch.py ${LAUNCH_OPTIONS}
