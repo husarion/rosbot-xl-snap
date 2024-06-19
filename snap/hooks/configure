@@ -7,8 +7,6 @@
 
 source $SNAP/usr/bin/utils.sh
 
-$SNAP/usr/bin/configure_hook_ros.sh
-
 # Define the top-level key and the list of valid keys
 VALID_DRIVER_KEYS=("mecanum" "include-camera-mount" "camera-model" "lidar-model" "db-serial-port" "manipulator-serial-port" )
 VALID_WEBUI_KEYS=("layout" "port")
@@ -62,6 +60,9 @@ if [ "${VALUE}" == "manipulation" ]; then
   snapctl set driver.camera-model=None
   snapctl set driver.include-camera-mount=False
 fi
+
+# moved to the end because for manipulator we usnet ros.namespace
+$SNAP/usr/bin/configure_hook_ros.sh
 
 # restart services with new ROS 2 config
 for service in daemon web-ui web-ws; do
