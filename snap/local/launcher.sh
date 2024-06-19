@@ -20,12 +20,32 @@ if [ "${LAUNCH_OPTIONS}" ]; then
   log "Running with options: ${LAUNCH_OPTIONS}"
 fi
 
-# ros2 launch rosbot_xl_bringup combined.launch.py ${LAUNCH_OPTIONS}
-ros2 launch $SNAP/usr/bin/bringup/rosbot.launch.py ${LAUNCH_OPTIONS}
+OPT="configuration"
+VALUE="$(snapctl get ${OPT})"
+if [ "${VALUE}" == "mobile-platform" ]; then
+  ros2 launch rosbot_xl_bringup bringup.launch.py ${LAUNCH_OPTIONS}
+else
+  # Check if SERIAL_PORT is set to auto or specified
+  SERIAL_PORT=$(find_ttyUSB driver.manipulator-serial-port "0403" "6014")
+  if [ $? -ne 0 ]; then
+    log_and_echo "Failed to find the serial port."
+    exit 1
+  else
+    log_and_echo "Found serial port: $SERIAL_PORT"
+  fi
 
-# don't work with namespaces currently
-# ros2 launch $SNAP/usr/bin/bringup/rosbot-manipulator.launch.py ${LAUNCH_OPTIONS} \
-#   manipulator_usb_port:=/dev/ttyUSB2 \
-#   manipulator_baud_rate:=${MANIPULATOR_BAUDRATE:-1000000} \
-#   joy_servo_params_file:=$SNAP/usr/bin/joy_servo.yaml \
-#   antenna_rotation_angle:=${ANTENNA_ROTATION_ANGLE:--1.57}
+  # Check if the specified serial port exists
+  if [ ! -e "$SERIAL_PORT" ]; then
+    log_and_echo "Specified serial port $SERIAL_PORT does not exist."
+    exit 1
+  else
+    log_and_echo "Specified serial port exists: $SERIAL_PORT"
+  fi
+
+  ros2 launch rosbot_xl_manipulation_bringup bringup.launch.py \
+    ${LAUNCH_OPTIONS} \
+    manipulator_usb_port:=${SERIAL_PORT} \
+    manipulator_baud_rate:=1000000 \
+    joy_servo_params_file:=${SNAP_COMMON}/joy_servo.yaml \
+    antenna_rotation_angle:=-1.57
+fi
