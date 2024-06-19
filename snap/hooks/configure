@@ -10,7 +10,7 @@ source $SNAP/usr/bin/utils.sh
 $SNAP/usr/bin/configure_hook_ros.sh
 
 # Define the top-level key and the list of valid keys
-VALID_DRIVER_KEYS=("namespace" "mecanum" "include-camera-mount" "camera-model" "lidar-model" "db-serial-port" "manipulator-serial-port" )
+VALID_DRIVER_KEYS=("mecanum" "include-camera-mount" "camera-model" "lidar-model" "db-serial-port" "manipulator-serial-port" )
 VALID_WEBUI_KEYS=("layout" "port")
 
 # Call the validation function
@@ -49,16 +49,16 @@ SUPPORTED_RANGE=(0 65535)
 # Validate a specific port, for example, webui.port
 validate_number "webui.port" SUPPORTED_RANGE[@] EXCLUDED_PORTS[@]
 
-VALID_CONFIGURATION_OPTIONS=("mobile-platform" "mobile-manipulator")
+VALID_CONFIGURATION_OPTIONS=("basic" "manipulation")
 
 # Validate parameters with array of possible values
 validate_option "configuration" VALID_CONFIGURATION_OPTIONS[@]
 
 OPT="configuration"
 VALUE="$(snapctl get ${OPT})"
-if [ "${VALUE}" == "mobile-manipulator" ]; then
-  log_and_echo "Currently the 'driver.namespace', 'driver.include-camera-mount' and 'driver.camera-model' are not supported for the 'mobile-manipulator' option. Unsetting them."
-  snapctl set driver.namespace!
+if [ "${VALUE}" == "manipulation" ]; then
+  log_and_echo "Currently the 'ros.namespace', 'driver.include-camera-mount' and 'driver.camera-model' are not supported for the 'manipulation' option. Unsetting them."
+  snapctl set ros.namespace!
   snapctl set driver.camera-model=None
   snapctl set driver.include-camera-mount=False
 fi

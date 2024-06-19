@@ -2,10 +2,19 @@
 
 source $SNAP/usr/bin/utils.sh
 
+LAUNCH_OPTIONS=""
+
+# Retrieve the namespace using snapctl
+NAMESPACE="$(snapctl get ros.namespace)"
+
+# Check if NAMESPACE is not set or is empty
+if [ -n "$NAMESPACE" ]; then
+    LAUNCH_OPTIONS+="namespace:=${NAMESPACE} "
+fi
+
 # Iterate over the snap parameters and retrieve their value.
 # If a value is set, it is forwarded to the launch file.
-OPTIONS="namespace mecanum include-camera-mount camera-model lidar-model"
-LAUNCH_OPTIONS=""
+OPTIONS="mecanum include-camera-mount camera-model lidar-model"
 
 for OPTION in ${OPTIONS}; do
   VALUE="$(snapctl get driver.${OPTION})"
@@ -22,9 +31,9 @@ fi
 
 OPT="configuration"
 VALUE="$(snapctl get ${OPT})"
-if [ "${VALUE}" == "mobile-platform" ]; then
+if [ "${VALUE}" == "basic" ]; then
   ros2 launch rosbot_xl_bringup bringup.launch.py ${LAUNCH_OPTIONS}
-else
+elif [ "${VALUE}" == "manipulation" ]; then
   # Check if SERIAL_PORT is set to auto or specified
   SERIAL_PORT=$(find_ttyUSB driver.manipulator-serial-port "0403" "6014")
   if [ $? -ne 0 ]; then

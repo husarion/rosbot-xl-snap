@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 # Retrieve the namespace using snapctl
-NAMESPACE="$(snapctl get driver.namespace)"
+NAMESPACE="$(snapctl get ros.namespace)"
 
 # Check if NAMESPACE is not set or is empty
 if [ -z "$NAMESPACE" ]; then

@@ -45,7 +45,7 @@ check_xml_profile_type() {
     fi
 }
 
-VALID_ROS_KEYS=("localhost-only" "domain-id" "transport")
+VALID_ROS_KEYS=("localhost-only" "domain-id" "transport" "namespace")
 
 # Call the validation function
 validate_keys "ros" VALID_ROS_KEYS[@]
@@ -105,14 +105,14 @@ ROS_SNAP_ARGS="${SNAP_COMMON}/ros_snap_args"
 echo "export ROS_DOMAIN_ID=${ROS_DOMAIN_ID}" > "${ROS_ENV_FILE}"
 echo "export ROS_LOCALHOST_ONLY=${ROS_LOCALHOST_ONLY}" >> "${ROS_ENV_FILE}"
 
-NAMESPACE=$(snapctl get driver.namespace)
+NAMESPACE=$(snapctl get ros.namespace)
 
 # Check if the namespace is set and not empty
 if [ -n "$NAMESPACE" ]; then
-  echo "ros.domain-id=${ROS_DOMAIN_ID} ros.localhost-only=${ROS_LOCALHOST_ONLY} ros.transport=${TRANSPORT_SETTING} driver.namespace=${NAMESPACE}" > "${ROS_SNAP_ARGS}"
+  echo "ros.domain-id=${ROS_DOMAIN_ID} ros.localhost-only=${ROS_LOCALHOST_ONLY} ros.transport=${TRANSPORT_SETTING} ros.namespace=${NAMESPACE}" > "${ROS_SNAP_ARGS}"
   echo "export ROS_NAMESPACE=${NAMESPACE}" >> "${ROS_ENV_FILE}"
 else
-  echo "ros.domain-id=${ROS_DOMAIN_ID} ros.localhost-only=${ROS_LOCALHOST_ONLY} ros.transport=${TRANSPORT_SETTING} driver.namespace!" > "${ROS_SNAP_ARGS}"
+  echo "ros.domain-id=${ROS_DOMAIN_ID} ros.localhost-only=${ROS_LOCALHOST_ONLY} ros.transport=${TRANSPORT_SETTING} ros.namespace!" > "${ROS_SNAP_ARGS}"
   echo "unset ROS_NAMESPACE" >> "${ROS_ENV_FILE}"
 fi
 

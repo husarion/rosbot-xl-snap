@@ -158,6 +158,7 @@ iterate:
     sudo snap try squashfs-root/
     sudo snap connect rosbot-xl:raw-usb
     sudo snap connect rosbot-xl:shm-plug rosbot-xl:shm-slot
+    sudo snap connect rosbot-xl:shutdown
 
     end_time=$(date +%s)
     duration=$(( end_time - start_time ))

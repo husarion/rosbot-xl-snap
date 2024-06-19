@@ -11,14 +11,13 @@ snapctl set driver.mecanum=True
 snapctl set driver.include-camera-mount=True
 snapctl set driver.camera-model=None
 snapctl set driver.lidar-model=None
-snapctl set driver.namespace! # unset
 snapctl set driver.db-serial-port=auto
 snapctl set driver.manipulator-serial-port=auto
 
 snapctl set webui.layout=default
 snapctl set webui.port=8080
 
-snapctl set configuration=mobile-platform
+snapctl set configuration=basic
 
 if ! snapctl is-connected raw-usb; then
   log "Plug 'raw-usb' isn't connected, please run:"

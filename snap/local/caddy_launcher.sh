@@ -29,8 +29,8 @@ echo "${index_html_content/"$replace_pattern"/$replace_value}" > $index_html_pat
 sed -i "s|<div id=\"root\"></div>|<script>\nlocalStorage.clear();sessionStorage.clear();\n</script>\n&|" $index_html_path
 
 # Define a function to log and echo messages
-# Retrieve the driver.namespace value
-namespace=$(snapctl get driver.namespace)
+# Retrieve the ros.namespace value
+namespace=$(snapctl get ros.namespace)
 
 # Check if the namespace is set and not empty
 if [ -n "$namespace" ]; then

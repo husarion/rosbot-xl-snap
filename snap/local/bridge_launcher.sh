@@ -1,10 +1,13 @@
 #!/bin/bash -e
 
-NAMESPACE="$(snapctl get driver.namespace)"
+LAUNCH_OPTIONS=""
 
-# Check if the namespace is set and not empty
+# Retrieve the namespace using snapctl
+NAMESPACE="$(snapctl get ros.namespace)"
+
+# Check if NAMESPACE is not set or is empty
 if [ -n "$NAMESPACE" ]; then
-  ros2 launch $SNAP/usr/bin/bridge_launch.py namespace:=${NAMESPACE}
-else
-  ros2 launch $SNAP/usr/bin/bridge_launch.py
+    LAUNCH_OPTIONS+="namespace:=${NAMESPACE} "
 fi
+
+ros2 launch $SNAP/usr/bin/bridge_launch.py ${LAUNCH_OPTIONS}

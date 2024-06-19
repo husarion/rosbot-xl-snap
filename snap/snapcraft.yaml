@@ -11,7 +11,7 @@ description: |
   To install this snap on the Single Board Computer (SBC) within the ROSbot XL chassis, follow these steps:
 
   1. Connect the SBC to the Digital Board inside ROSbot XL using an Ethernet cable.
-  2. Configure the Ethernet Interface with the static IP address `192.168.77.2` (port `8888` on this IP is used by the STM32F4 microcontroller).
+  2. Configure the Ethernet Interface with the static IP address `192.168.77.2` (port `8888` on this IP is used by the firmware).
   3. Run the following command to install the snap:
 
      snap install rosbot-xl
@@ -20,22 +20,28 @@ description: |
 
   The snap provides the following configurable parameters (`param name`: `default value`):
 
+  * `configuration`: `basic` - presets for ROSbot XL
   * `driver`: `{...}`
-  * `ros-domain-id`: `0` - Sets the `ROS_DOMAIN_ID` environment variable for the ROS driver.
-  * `ros-localhost-only`: `0` - Sets the `ROS_LOCALHOST_ONLY` environment variable for the ROS driver.
-  * `serial-port`: `auto` - Configures the serial port for firmware updates (e.g., `/dev/ttyUSB0`), or set it to `auto`.
-  * `transport`: `udp` - Configures DDS transport. Options are `udp`, `shm`, `builtin` (or `rmw_fastrtps_cpp`), `rmw_cyclonedds_cpp`. Corresponding DDS XML files can be found in the `/var/snap/rosbot-xl/common` directory (custom FastDDS setups can also be created here).
+  * `ros`: `{...}`
   * `webui`: `{...}`
 
-  The `driver` parameter is a dictionary containing the following keys for a ROS 2 driver:
+  The `ros` contains the following keys:
 
-  * `driver.namespace`: `(unset)` - Namespace for all topics and transforms.
+  * `ros.ros-domain-id`: `0` - Sets the `ROS_DOMAIN_ID` environment variable for the ROS driver.
+  * `ros.ros-localhost-only`: `0` - Sets the `ROS_LOCALHOST_ONLY` environment variable for the ROS driver.
+  * `ros.transport`: `udp` - Configures DDS transport. Options are `udp`, `shm`, `builtin` (or `rmw_fastrtps_cpp`), `rmw_cyclonedds_cpp`. Corresponding DDS XML files can be found in the `/var/snap/rosbot-xl/common` directory (custom FastDDS setups can also be created here).
+  * `ros.namespace`: `(unset)` - Namespace for all topics and transforms.
+
+  The `driver` contains the following keys:
+
   * `driver.mecanum`: `True` - Enables the mecanum drive controller; otherwise, uses the differential drive controller.
   * `driver.include-camera-mount`: `True` - Includes the camera mount in the robot URDF.
   * `driver.camera-model`: `None` - Adds the camera model to the robot URDF.
   * `driver.lidar-model`: `None` - Adds the LIDAR model to the robot URDF.
+  * `driver.db-serial-port`: `auto` - Serial port for firmware (e.g., `/dev/ttyUSB0`), or set it to `auto`.
+  * `driver.manipulator-serial-port`: `auto` - Serial port for OpenManipulator-X (e.g., `/dev/ttyUSB0`), or set it to `auto`.
 
-  The `webui` parameter is a dictionary containing the following keys for the Web UI:
+  The `webui` contains the following keys:
 
   * `webui.layout`: `default` - Specifies the layout for the Web UI. Available `*.json` layout files can be found in the `/var/snap/rosbot-xl/common` directory (custom layouts can also be created here).
   * `webui.port`: `8080` - Specifies the port for the built-in web server hosting the Web UI.
@@ -66,7 +72,7 @@ description: |
   Example usage:
 
      # Set parameters in the rosbot-xl snap
-     sudo snap set rosbot-xl transport=udp ros-domain-id=123 driver.namespace=abc
+     sudo snap set rosbot-xl transport=udp ros-domain-id=123 ros.namespace=abc
 
      # Mirror the setup for other ROS 2 snaps
      sudo snap set husarion-depthai $(cat /var/snap/rosbot-xl/common/ros_snap_args)
@@ -359,7 +365,7 @@ parts:
   # copy local scripts to the snap usr/bin
   local-files-ros:
     plugin: dump
-    source: snap/local/ros_common/
+    source: snap/local/local-ros/
     organize:
       '*.sh': usr/bin/
       '*.xml': usr/share/rosbot-xl/config/
