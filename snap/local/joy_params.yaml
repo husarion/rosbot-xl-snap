@@ -1,0 +1,6 @@
+joy_node:
+  ros__parameters:
+    dev: "/dev/input/js0"  # Replace with your joystick device
+    deadzone: 0.1
+    autorepeat_rate: 20.0
+    # dev_ff: "/dev/input/event18" # based on evtest

@@ -35,6 +35,8 @@ cp -r $SNAP/usr/share/rosbot-xl/config/teleop_twist_joy_params.yaml ${SNAP_COMMO
 
 # copy joy params
 cp -r $SNAP/usr/share/rosbot-xl/config/joy_servo.yaml ${SNAP_COMMON}/
+cp -r $SNAP/usr/share/rosbot-xl/config/joy_teleop.config.yaml ${SNAP_COMMON}/
+cp -r $SNAP/usr/share/rosbot-xl/config/joy_params.yaml ${SNAP_COMMON}/
 
 # copy webui layouts
 cp -r $SNAP/usr/share/$SNAP_NAME/config/foxglove-*.json ${SNAP_COMMON}/

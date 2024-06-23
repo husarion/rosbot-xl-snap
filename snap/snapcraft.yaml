@@ -169,6 +169,29 @@ apps:
     slots: [shm-slot]
     extensions: [ros2-humble-ros-base]
 
+  joy:
+    command: usr/bin/joy_launcher.sh
+    command-chain: [usr/bin/ros_setup.sh]
+    environment:
+      LD_LIBRARY_PATH: "$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pulseaudio:$LD_LIBRARY_PATH"
+    plugs: [hardware-observe, joystick, network, network-bind, shm-plug]
+    slots: [shm-slot]
+    extensions: [ros2-humble-ros-base]
+
+  arm-activate:
+    command: usr/bin/arm_activate_launcher.sh active
+    command-chain: [usr/bin/ros_setup.sh]
+    plugs: [network, network-bind, shm-plug]
+    slots: [shm-slot]
+    extensions: [ros2-humble-ros-base]
+    
+  arm-disactivate:
+    command: usr/bin/arm_activate_launcher.sh inactive
+    command-chain: [usr/bin/ros_setup.sh]
+    plugs: [network, network-bind, shm-plug]
+    slots: [shm-slot]
+    extensions: [ros2-humble-ros-base]
+
   print-serial-number:
     command: usr/bin/serial_number_launcher.sh
     command-chain: [usr/bin/ros_setup.sh]
