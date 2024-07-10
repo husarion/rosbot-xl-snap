@@ -338,6 +338,26 @@ def generate_launch_description():
         }.items(),
     )
 
+    # Retrieve the SNAP_COMMON environment variable
+    snap_common = os.environ.get('SNAP_COMMON', '/var/snap/rosbot-xl/common/')  # Provide a default path in case it's not set
+
+    # Declare the parameters file launch argument
+    joy_params_file = LaunchConfiguration("params_file")
+    joy_params_file_arg = DeclareLaunchArgument(
+        "params_file",
+        default_value=os.path.join(snap_common, 'teleop_twist_joy_params.yaml')
+    )
+
+    # Node configuration for teleop_twist_joy
+    teleop_twist_joy = Node(
+        package='teleop_twist_joy',
+        executable='teleop_node',
+        name='teleop_twist_joy_node',
+        parameters=[joy_params_file],
+        output='screen',
+        namespace=namespace,
+    )
+
     return LaunchDescription(
         [
             declare_port_arg,
@@ -364,5 +384,7 @@ def generate_launch_description():
             manipulator_controller_launch,
             moveit_launch,
             servo_launch,
+            joy_params_file_arg,
+            teleop_twist_joy
         ]
     )

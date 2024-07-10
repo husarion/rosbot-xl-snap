@@ -180,6 +180,15 @@ apps:
     slots: [shm-slot]
     extensions: [ros2-humble-ros-base]
 
+  teleop-twist-joy:
+    command: usr/bin/teleop_twist_joy_launcher.sh
+    command-chain: [usr/bin/ros_setup.sh]
+    daemon: simple
+    install-mode: enable
+    plugs: [network, network-bind, shm-plug]
+    slots: [shm-slot]
+    extensions: [ros2-humble-ros-base]
+
   arm-activate:
     command: usr/bin/arm_activate_launcher.sh active
     command-chain: [usr/bin/ros_setup.sh]
