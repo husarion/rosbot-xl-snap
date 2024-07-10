@@ -1,5 +1,7 @@
 #!/bin/bash -e
 
+# deprecated (using caddy templates instead)
+
 LAYOUT="$(snapctl get webui.layout)"
 NAMESPACE="$(snapctl get driver.namespace)"
 

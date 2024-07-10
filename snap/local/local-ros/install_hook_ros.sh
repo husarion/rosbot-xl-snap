@@ -3,9 +3,10 @@
 # Define a function to log messages
 source $SNAP/usr/bin/utils.sh
 
-snapctl set transport="udp"
-snapctl set ros-localhost-only=0
-snapctl set ros-domain-id=0
+snapctl set ros.transport="udp"
+snapctl set ros.localhost-only=0
+snapctl set ros.domain-id=0
+snapctl set ros.namespace! # unset
 
 if ! snapctl is-connected ros-humble-ros-base; then
   log "Plug 'ros-humble-ros-base' isn't connected, please run:"

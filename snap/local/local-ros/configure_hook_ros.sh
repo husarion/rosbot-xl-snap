@@ -45,31 +45,26 @@ check_xml_profile_type() {
     fi
 }
 
+VALID_ROS_KEYS=("localhost-only" "domain-id" "transport" "namespace")
+
+# Call the validation function
+validate_keys "ros" VALID_ROS_KEYS[@]
+
+ROS_LOCALHOST_ONLY="$(snapctl get ros.localhost-only)"
+ROS_DOMAIN_ID="$(snapctl get ros.domain-id)"
+
 # Make sure ROS_LOCALHOST_ONLY is valid
-OPT="ros-localhost-only"
-ROS_LOCALHOST_ONLY="$(snapctl get ${OPT})"
-if [ -n "${ROS_LOCALHOST_ONLY}" ]; then
-  case "${ROS_LOCALHOST_ONLY}" in
-  1) ;;
-  0) ;;
-  *)
-    log_and_echo "'${ROS_LOCALHOST_ONLY}' is not a supported value for '${OPT}'. Possible values are 0 or 1."
-    exit 1
-    ;;
-  esac
-fi
+VALID_ROS_LOCALHOST_ONLY_OPTIONS=(1 0)
+validate_option "ros.localhost-only" VALID_ROS_LOCALHOST_ONLY_OPTIONS[@]
 
 # Make sure ROS_DOMAIN_ID is valid
-OPT="ros-domain-id"
-ROS_DOMAIN_ID="$(snapctl get ${OPT})"
+# Make sure WEBUI_PORT is valid
+SUPPORTED_RANGE=(0 232)
+# Validate a specific port, for example, webui.port
+validate_number "ros.domain-id" SUPPORTED_RANGE[@]
 
-if ! is_integer "${ROS_DOMAIN_ID}" || [ "${ROS_DOMAIN_ID}" -lt 0 ] || [ "${ROS_DOMAIN_ID}" -gt 232 ]; then
-  log_and_echo "'${ROS_DOMAIN_ID}' is not a supported value for '${OPT}'. Possible values are integers between 0 and 232."
-  exit 1
-fi
-
-# Get the transport setting using snapctl
-OPT="transport"
+# Get the ros.transport setting using snapctl
+OPT="ros.transport"
 TRANSPORT_SETTING="$(snapctl get ${OPT})"
 
 # Check if TRANSPORT_SETTING is "builtin"
@@ -110,18 +105,18 @@ ROS_SNAP_ARGS="${SNAP_COMMON}/ros_snap_args"
 echo "export ROS_DOMAIN_ID=${ROS_DOMAIN_ID}" > "${ROS_ENV_FILE}"
 echo "export ROS_LOCALHOST_ONLY=${ROS_LOCALHOST_ONLY}" >> "${ROS_ENV_FILE}"
 
-NAMESPACE=$(snapctl get driver.namespace)
+NAMESPACE=$(snapctl get ros.namespace)
 
 # Check if the namespace is set and not empty
 if [ -n "$NAMESPACE" ]; then
-  echo "ros-domain-id=${ROS_DOMAIN_ID} ros-localhost-only=${ROS_LOCALHOST_ONLY} transport=${TRANSPORT_SETTING} driver.namespace=${NAMESPACE}" > "${ROS_SNAP_ARGS}"
+  echo "ros.domain-id=${ROS_DOMAIN_ID} ros.localhost-only=${ROS_LOCALHOST_ONLY} ros.transport=${TRANSPORT_SETTING} ros.namespace=${NAMESPACE}" > "${ROS_SNAP_ARGS}"
   echo "export ROS_NAMESPACE=${NAMESPACE}" >> "${ROS_ENV_FILE}"
 else
-  echo "ros-domain-id=${ROS_DOMAIN_ID} ros-localhost-only=${ROS_LOCALHOST_ONLY} transport=${TRANSPORT_SETTING} driver.namespace!" > "${ROS_SNAP_ARGS}"
+  echo "ros.domain-id=${ROS_DOMAIN_ID} ros.localhost-only=${ROS_LOCALHOST_ONLY} ros.transport=${TRANSPORT_SETTING} ros.namespace!" > "${ROS_SNAP_ARGS}"
   echo "unset ROS_NAMESPACE" >> "${ROS_ENV_FILE}"
 fi
 
-# Check the transport setting and export the appropriate environment variable
+# Check the ros.transport setting and export the appropriate environment variable
 if [ "$TRANSPORT_SETTING" != "rmw_fastrtps_cpp" ] && [ "$TRANSPORT_SETTING" != "rmw_cyclonedds_cpp" ]; then
     profile_type=$(check_xml_profile_type "${SNAP_COMMON}/${TRANSPORT_SETTING}.xml")
     if [[ "$profile_type" == "rmw_fastrtps_cpp" ]]; then
