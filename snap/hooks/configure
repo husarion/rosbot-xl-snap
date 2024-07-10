@@ -65,7 +65,7 @@ fi
 $SNAP/usr/bin/configure_hook_ros.sh
 
 # restart services with new ROS 2 config
-for service in daemon web-ui web-ws joy teleop_twist_joy; do
+for service in daemon web-ui web-ws joy teleop-twist-joy; do
   if snapctl services ${SNAP_NAME}.${service} | grep -qw enabled; then
     snapctl restart ${SNAP_NAME}.${service}
     log "Restarted ${SNAP_NAME}.${service}"
