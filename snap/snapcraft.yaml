@@ -172,6 +172,8 @@ apps:
   joy:
     command: usr/bin/joy_launcher.sh
     command-chain: [usr/bin/ros_setup.sh]
+    daemon: simple
+    install-mode: disable
     environment:
       LD_LIBRARY_PATH: "$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pulseaudio:$LD_LIBRARY_PATH"
     plugs: [hardware-observe, joystick, network, network-bind, shm-plug]

@@ -117,7 +117,57 @@ validate_number() {
     fi
 }
 
+validate_regex() {
+    local value_key=$1
+    local regex=$2
+    local error_message=$3
 
+    # Get the value using snapctl
+    local value=$(snapctl get "$value_key")
+
+    # Check if the value matches the regex
+    if ! [[ "$value" =~ $regex ]]; then
+        log_and_echo "'${value}' is not a supported value for '${value_key}'. ${error_message}"
+        exit 1
+    fi
+}
+
+validate_path() {
+    local value_key=$1
+
+    # Get the value using snapctl
+    local config_path=$(snapctl get "$value_key")
+
+    # Check if the path is a valid file
+    if [ ! -f "$config_path" ]; then
+        log_and_echo "The path specified in '$value_key' does not exist: '$config_path'."
+        exit 1
+    fi
+}
+
+validate_ipv4_addr() {
+    local value_key=$1
+
+    # Get the value using snapctl
+    local ip_address=$(snapctl get "$value_key")
+    local ip_address_regex='^(([0-9]{1,3}\.){3}[0-9]{1,3})$'
+
+    if [[ "$ip_address" =~ $ip_address_regex ]]; then
+        # Split the IP address into its parts
+        IFS='.' read -r -a octets <<< "$ip_address"
+
+        # Check each octet
+        for octet in "${octets[@]}"; do
+            if ((octet < 0 || octet > 255)); then
+                log_and_echo "Invalid format for '$value_key'. Each part of the IPv4 address must be between 0 and 255. Received: '$ip_address'."
+                exit 1
+            fi
+        done
+    else
+        log_and_echo "Invalid format for '$value_key'. Expected format: a valid IPv4 address. Received: '$ip_address'."
+        exit 1
+    fi
+}
 
 # Universal function to validate serial ports
 validate_serial_port() {
