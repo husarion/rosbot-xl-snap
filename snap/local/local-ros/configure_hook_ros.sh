@@ -87,14 +87,14 @@ if [ "$TRANSPORT_SETTING" = "rmw_fastrtps_cpp" ] || [ "$TRANSPORT_SETTING" = "sh
   fi
 fi
 
-# Make sure ros-humble-ros-base is connected
-ROS_PLUG="ros-humble-ros-base"
+# # Make sure ros-humble-ros-base is connected
+# ROS_PLUG="ros-humble-ros-base"
 
-if ! snapctl is-connected ${ROS_PLUG}; then
-    log_and_echo "Plug '${ROS_PLUG}' isn't connected. Please run:"
-    log_and_echo "snap connect ${SNAP_NAME}:${ROS_PLUG} ${ROS_PLUG}:${ROS_PLUG}"
-    exit 1
-fi
+# if ! snapctl is-connected ${ROS_PLUG}; then
+#     log_and_echo "Plug '${ROS_PLUG}' isn't connected. Please run:"
+#     log_and_echo "snap connect ${SNAP_NAME}:${ROS_PLUG} ${ROS_PLUG}:${ROS_PLUG}"
+#     exit 1
+# fi
 
 # Create the ${SNAP_COMMON}/ros.env file and export variables (for bash session running ROS2)
 ROS_ENV_FILE="${SNAP_COMMON}/ros.env"
