@@ -114,14 +114,6 @@ contact: https://github.com/husarion/rosbot-xl-snap/issues
 issues: https://github.com/husarion/rosbot-xl-snap/issues
 website: https://husarion.com/manuals/rosbot-xl/overview/
 
-architectures:
-  - build-on: amd64
-    build-for: amd64
-  # - build-on: amd64
-  #   build-for: arm64
-  - build-on: arm64
-    build-for: arm64
-
 slots:
   shm-slot:
     interface: shared-memory
@@ -173,19 +165,10 @@ apps:
     command: usr/bin/joy_launcher.sh
     command-chain: [usr/bin/ros_setup.sh]
     daemon: simple
-    install-mode: disable
+    install-mode: enable
     environment:
       LD_LIBRARY_PATH: "$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pulseaudio:$LD_LIBRARY_PATH"
     plugs: [hardware-observe, joystick, network, network-bind, shm-plug]
-    slots: [shm-slot]
-    extensions: [ros2-{{ ros_distro }}-ros-base]
-
-  teleop-twist-joy:
-    command: usr/bin/teleop_twist_joy_launcher.sh
-    command-chain: [usr/bin/ros_setup.sh]
-    daemon: simple
-    install-mode: enable
-    plugs: [network, network-bind, shm-plug]
     slots: [shm-slot]
     extensions: [ros2-{{ ros_distro }}-ros-base]
 
@@ -223,27 +206,6 @@ apps:
   config-ftdi:
     command: usr/bin/ftdi_eeprom_conf_launcher.sh
     plugs: [raw-usb, network-bind]
-
-  web-ui:
-    command: usr/bin/caddy_launcher.sh
-    daemon: simple
-    install-mode: disable
-    plugs: [network, network-bind]
-
-  web-ws:
-    command: usr/bin/bridge_launcher.sh
-    command-chain: [usr/bin/ros_setup.sh]
-    daemon: simple
-    install-mode: disable
-    plugs: [network, network-bind, shm-plug]
-    slots: [shm-slot]
-    extensions: [ros2-{{ ros_distro }}-ros-base]
-
-  start-web-ui:
-    command: usr/bin/start_web_ui_launcher.sh
-
-  stop-web-ui:
-    command: usr/bin/stop_web_ui_launcher.sh
 
 parts:
   # rosbot-xl:
@@ -283,10 +245,12 @@ parts:
     source-branch: "1.1.2"
     build-packages: 
       - python3-vcstool
+      - python3-ftdi
     stage-packages: 
       - stm32flash
       - libusb-1.0-0
       - usbutils
+      - python3-ftdi
       - ros-{{ ros_distro }}-rmw-cyclonedds-cpp
     override-pull: |
       craftctl default
@@ -316,70 +280,18 @@ parts:
     plugin: nil
     stage-packages:
       - ros-{{ ros_distro }}-teleop-twist-keyboard
-      - ros-{{ ros_distro }}-teleop-twist-joy
+      # - ros-{{ ros_distro }}-teleop-twist-joy # 2024-09-13: in apt repository is 2.6.0 version, and stamped messages were introduced in 2.6.1 (https://github.com/ros2/teleop_twist_joy)
 
-  # web-ui:
-  #   plugin: nil
-  #   build-packages:
-  #     - curl
-  #   build-environment:
-  #     - CADDY_RELEASE: "2.7.4"
-  #   override-build: |
-  #     set -x
-  #     craftctl default
-  #     curl -L https://github.com/caddyserver/caddy/releases/download/v${CADDY_RELEASE}/caddy_${CADDY_RELEASE}_linux_${CRAFT_ARCH_BUILD_FOR}.deb -o caddy.deb
-  #     dpkg -i caddy.deb
-
-  web-server:
-    plugin: dump
-    source: 
-      - on amd64: https://github.com/caddyserver/caddy/releases/download/v2.7.4/caddy_2.7.4_linux_amd64.deb
-      - on arm64: https://github.com/caddyserver/caddy/releases/download/v2.7.4/caddy_2.7.4_linux_arm64.deb
-    source-type: deb
-
-  web-ui:
-    plugin: nil
-    build-packages:
-      - curl
-    override-build: |
-      # Use the Snapcraft build directory which is writable
-      cd $SNAPCRAFT_PART_BUILD
-      curl -L https://github.com/husarion/foxglove-studio/releases/download/v1.0.1/web-build.tar.gz -o foxglove.tar.gz
-      mkdir -p www/foxglove
-      tar -xzf foxglove.tar.gz -C www/foxglove
-      rm foxglove.tar.gz
-      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/local
-      cp -r www $SNAPCRAFT_PART_INSTALL/usr/local
-
-  web-ws:
-    plugin: nil
-    stage-packages:
-      - ros-{{ ros_distro }}-foxglove-bridge
-      - ros-{{ ros_distro }}-rosbridge-server
-      - ros-{{ ros_distro }}-bond
-      - ros-{{ ros_distro }}-control-msgs
-      - ros-{{ ros_distro }}-controller-manager-msgs
-      - ros-{{ ros_distro }}-image-transport-plugins
-      - ros-{{ ros_distro }}-map-msgs
-      - ros-{{ ros_distro }}-nav2-msgs
-      - ros-{{ ros_distro }}-tf2-msgs
-      - ros-{{ ros_distro }}-robot-localization
-
-  yq:
-    plugin: nil
-    override-build: |
-      craftctl default
-
-      YQ_VERSION="v4.35.1"
-      TARGETARCH=$CRAFT_ARCH_BUILD_FOR
-      curl -L "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${TARGETARCH}" -o $CRAFT_PART_BUILD/yq
-    override-prime: |
-      craftctl default
-    
-      cp $CRAFT_PART_BUILD/yq $CRAFT_PRIME/usr/bin/yq
-      chmod +x $CRAFT_PRIME/usr/bin/yq
-    build-packages:
-      - curl
+  # after version 2.6.1+ will be available in apt repository, remove it:
+  teleop-twist-joy:
+    plugin: colcon
+    source: https://github.com/ros2/teleop_twist_joy.git
+    stage:
+      - "-opt/ros/snap/local_setup.sh"
+      - "-opt/ros/snap/setup.bash"
+      - "-opt/ros/snap/setup.ps1"
+      - "-opt/ros/snap/setup.sh"
+      - "-opt/ros/snap/setup.zsh"
 
   db-server:
     plugin: nil
@@ -388,22 +300,31 @@ parts:
       - curl
       - netcat
 
-  pip3-dependencies:
-    plugin: python
-    source: .
-    build-packages:
-      - python3-pip
-    python-packages:
-      - pyftdi
-
-  # copy local scripts to the snap usr/bin
-  local-files-ros:
+  husarion-snap-common:
     plugin: dump
-    source: snap/local/local-ros/
+    source: https://github.com/husarion/husarion-snap-common
+    source-branch: "0.5.0"
+    source-type: git
+    build-environment:
+      - YQ_VERSION: "v4.35.1"
+    build-packages:
+      - curl
     organize:
-      '*.sh': usr/bin/
-      '*.xml': usr/share/rosbot-xl/config/
-
+      'local-ros/*.sh': usr/bin/
+      'local-ros/*.xml': usr/share/husarion-snap-common/config/
+      'local-ros/ros.env': usr/share/husarion-snap-common/config/
+    override-build: |
+      craftctl default
+      curl -L "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${CRAFT_ARCH_BUILD_FOR}" -o $CRAFT_PART_BUILD/yq
+    override-prime: |
+      craftctl default
+      cp $CRAFT_PART_BUILD/yq $CRAFT_PRIME/usr/bin/yq
+      chmod +x $CRAFT_PRIME/usr/bin/yq
+      rm -rf $CRAFT_PRIME/local-ros
+    stage:
+      - "-usr/bin/start_launcher.sh"
+      - "-usr/bin/stop_launcher.sh"
+      
   local-files:
     plugin: dump
     source: snap/local/
