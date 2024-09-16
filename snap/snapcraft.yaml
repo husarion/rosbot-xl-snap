@@ -324,7 +324,7 @@ parts:
     stage:
       - "-usr/bin/start_launcher.sh"
       - "-usr/bin/stop_launcher.sh"
-      
+
   local-files:
     plugin: dump
     source: snap/local/

@@ -11,7 +11,7 @@ description: |
   To install this snap on the Single Board Computer (SBC) within the ROSbot XL chassis, follow these steps:
 
   1. Connect the SBC to the Digital Board inside ROSbot XL using an Ethernet cable.
-  2. Configure the Ethernet Interface with the static IP address `192.168.77.2` (port `8888` on this IP is used by the firmware).
+  2. Configure the Ethernet Interface with the static IP address `192.168.77.2`.
   3. Run the following command to install the snap:
 
      snap install rosbot-xl
@@ -24,6 +24,8 @@ description: |
   * `driver`: `{...}`
   * `ros`: `{...}`
   * `webui`: `{...}`
+
+  The `configuration` key can be set to `basic` or `manipulation` (for ROSbot XL with OpenManipulator-X).
 
   The `ros` contains the following keys:
 
@@ -324,7 +326,7 @@ parts:
     stage:
       - "-usr/bin/start_launcher.sh"
       - "-usr/bin/stop_launcher.sh"
-      
+
   local-files:
     plugin: dump
     source: snap/local/
