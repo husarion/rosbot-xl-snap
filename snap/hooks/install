@@ -27,6 +27,8 @@ fi
 # cp -r $SNAP/opt/ros/snap/share/rosbot_xl_description ${SNAP_COMMON}/ros2_ws/rosbot_xl_description
 # cp -r $SNAP/opt/ros/snap/share/ros_components_description ${SNAP_COMMON}/ros2_ws/ros_components_description
 
+cp -r $SNAP/usr/bin/post_install.sh ${SNAP_COMMON}/
+
 # copy joy params
 cp -r $SNAP/usr/share/rosbot-xl/config/teleop_twist_joy_params.yaml ${SNAP_COMMON}/
 
