@@ -2,3 +2,4 @@
 .snapcraft_store_credentials.txt
 squashfs-root/
 **/snapcraft.yaml
+exported.txt

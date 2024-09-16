@@ -191,3 +191,15 @@ remove-logs:
     #!/bin/bash
     sudo rm -rf /var/log/journal/*
     sudo systemctl restart systemd-journald
+
+prepare-store-credentials:
+    #!/bin/bash
+    snapcraft export-login --snaps=rosbot-xl \
+      --acls package_access,package_push,package_update,package_release \
+      exported.txt
+
+publish:
+    #!/bin/bash
+    export SNAPCRAFT_STORE_CREDENTIALS=$(cat exported.txt)
+    snapcraft login
+    snapcraft upload --release edge rosbot-xl*.snap
