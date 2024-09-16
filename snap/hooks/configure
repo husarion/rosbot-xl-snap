@@ -9,11 +9,9 @@ source $SNAP/usr/bin/utils.sh
 
 # Define the top-level key and the list of valid keys
 VALID_DRIVER_KEYS=("mecanum" "include-camera-mount" "camera-model" "lidar-model" "db-serial-port" "manipulator-serial-port" )
-VALID_WEBUI_KEYS=("layout" "port")
 
 # Call the validation function
 validate_keys "driver" VALID_DRIVER_KEYS[@]
-validate_keys "webui" VALID_WEBUI_KEYS[@]
 
 # Define the valid options for camera model and lidar model
 VALID_CAMERA_OPTIONS=("None" "intel_realsense_d435" "orbbec_astra" "stereolabs_zed" "stereolabs_zedm" "stereolabs_zed2" "stereolabs_zed2i" "stereolabs_zedx" "stereolabs_zedxm")
@@ -27,25 +25,10 @@ validate_option "driver.mecanum" VALID_BOOLEAN_OPTIONS[@]
 validate_option "driver.include-camera-mount" VALID_BOOLEAN_OPTIONS[@]
 
 # Validate specific serial ports
-validate_serial_port "driver.db-serial-port"
-validate_serial_port "driver.manipulator-serial-port"
-
-# Get the transport setting using snapctl
-OPT="webui.layout"
-LAYOUT="$(snapctl get ${OPT})"
-
-# Only exit with status 1 if conditions are not met
-if [ ! -f "${SNAP_COMMON}/foxglove-${LAYOUT}.json" ]; then
-  log_and_echo "'${SNAP_COMMON}/foxglove-${LAYOUT}.json' does not exist."
-  exit 1
-fi
-
-# Make sure WEBUI_PORT is valid
-EXCLUDED_PORTS=(3000 8888)
-SUPPORTED_RANGE=(0 65535)
-
-# Validate a specific port, for example, webui.port
-validate_number "webui.port" SUPPORTED_RANGE[@] EXCLUDED_PORTS[@]
+# validate driver.serial-port
+ALTERNATIVE_SERIAL_PORT_OPTIONS=("auto")
+validate_path "driver.db-serial-port" "/dev/ttyUSB[0-9]+" ALTERNATIVE_SERIAL_PORT_OPTIONS[@]
+validate_path "driver.manipulator-serial-port" "/dev/ttyUSB[0-9]+" ALTERNATIVE_SERIAL_PORT_OPTIONS[@]
 
 VALID_CONFIGURATION_OPTIONS=("basic" "manipulation")
 
@@ -65,7 +48,7 @@ fi
 $SNAP/usr/bin/configure_hook_ros.sh
 
 # restart services with new ROS 2 config
-for service in daemon web-ui web-ws joy teleop-twist-joy; do
+for service in daemon joy; do
   if snapctl services ${SNAP_NAME}.${service} | grep -qw enabled; then
     snapctl restart ${SNAP_NAME}.${service}
     log "Restarted ${SNAP_NAME}.${service}"

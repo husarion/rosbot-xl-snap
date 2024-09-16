@@ -22,5 +22,6 @@
       yaw: 0.4
 
     require_enable_button: true
-    enable_button: 4  # TL shoulder button
-    enable_turbo_button: -1  # disabled
+    enable_button: 4  # LB button
+    enable_turbo_button: 7
+    publish_stamped_twist: true

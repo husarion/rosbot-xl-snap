@@ -1,3 +1,5 @@
 *.snap
-squashfs-root
-test*
+.snapcraft_store_credentials.txt
+squashfs-root/
+**/snapcraft.yaml
+exported.txt

@@ -236,12 +236,6 @@ def generate_launch_description():
         namespace=namespace,
     )
 
-    launch_joy_node = LaunchConfiguration("launch_joy_node")
-    declare_launch_joy_node_arg = DeclareLaunchArgument(
-        "launch_joy_node",
-        default_value="False",
-    )
-
     manipulator_usb_port = LaunchConfiguration("manipulator_usb_port")
     declare_manipulator_usb_port_arg = DeclareLaunchArgument(
         "manipulator_usb_port",
@@ -329,7 +323,6 @@ def generate_launch_description():
             )
         ),
         launch_arguments={
-            "launch_joy_node": launch_joy_node,
             "joy_servo_params_file": joy_servo_config,
             "joint1_limit_min": joint1_limit_min,
             "joint1_limit_max": joint1_limit_max,
@@ -341,22 +334,6 @@ def generate_launch_description():
     # Retrieve the SNAP_COMMON environment variable
     snap_common = os.environ.get('SNAP_COMMON', '/var/snap/rosbot-xl/common/')  # Provide a default path in case it's not set
 
-    # Declare the parameters file launch argument
-    joy_params_file = LaunchConfiguration("params_file")
-    joy_params_file_arg = DeclareLaunchArgument(
-        "params_file",
-        default_value=os.path.join(snap_common, 'teleop_twist_joy_params.yaml')
-    )
-
-    # Node configuration for teleop_twist_joy
-    teleop_twist_joy = Node(
-        package='teleop_twist_joy',
-        executable='teleop_node',
-        name='teleop_twist_joy_node',
-        parameters=[joy_params_file],
-        output='screen',
-        namespace=namespace,
-    )
 
     return LaunchDescription(
         [
@@ -370,7 +347,6 @@ def generate_launch_description():
             declare_use_sim_arg,
             declare_simulation_engine_arg,
             declare_combined_launch_deprecated_arg,
-            declare_launch_joy_node_arg,
             declare_manipulator_usb_port_arg,
             declare_manipulator_baud_rate_arg,
             declare_joy_servo_config_arg,
@@ -384,7 +360,5 @@ def generate_launch_description():
             manipulator_controller_launch,
             moveit_launch,
             servo_launch,
-            joy_params_file_arg,
-            teleop_twist_joy
         ]
     )

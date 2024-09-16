@@ -14,9 +14,6 @@ snapctl set driver.lidar-model=None
 snapctl set driver.db-serial-port=auto
 snapctl set driver.manipulator-serial-port=auto
 
-snapctl set webui.layout=default
-snapctl set webui.port=8080
-
 snapctl set configuration=basic
 
 if ! snapctl is-connected raw-usb; then
@@ -24,11 +21,11 @@ if ! snapctl is-connected raw-usb; then
   log "sudo snap connect ${SNAP_NAME}:raw-usb"
 fi
 
-# copy meshes to shared folder
-log "copy meshes to '${SNAP_COMMON}/ros2_ws/'"
-mkdir -p ${SNAP_COMMON}/ros2_ws
-cp -r $SNAP/opt/ros/snap/share/rosbot_xl_description ${SNAP_COMMON}/ros2_ws/rosbot_xl_description
-cp -r $SNAP/opt/ros/snap/share/ros_components_description ${SNAP_COMMON}/ros2_ws/ros_components_description
+# # copy meshes to shared folder
+# log "copy meshes to '${SNAP_COMMON}/ros2_ws/'"
+# mkdir -p ${SNAP_COMMON}/ros2_ws
+# cp -r $SNAP/opt/ros/snap/share/rosbot_xl_description ${SNAP_COMMON}/ros2_ws/rosbot_xl_description
+# cp -r $SNAP/opt/ros/snap/share/ros_components_description ${SNAP_COMMON}/ros2_ws/ros_components_description
 
 # copy joy params
 cp -r $SNAP/usr/share/rosbot-xl/config/teleop_twist_joy_params.yaml ${SNAP_COMMON}/
@@ -38,5 +35,5 @@ cp -r $SNAP/usr/share/rosbot-xl/config/joy_servo.yaml ${SNAP_COMMON}/
 cp -r $SNAP/usr/share/rosbot-xl/config/joy_teleop.config.yaml ${SNAP_COMMON}/
 cp -r $SNAP/usr/share/rosbot-xl/config/joy_params.yaml ${SNAP_COMMON}/
 
-# copy webui layouts
-cp -r $SNAP/usr/share/$SNAP_NAME/config/foxglove-*.json ${SNAP_COMMON}/
+# # copy webui layouts
+# cp -r $SNAP/usr/share/$SNAP_NAME/config/foxglove-*.json ${SNAP_COMMON}/

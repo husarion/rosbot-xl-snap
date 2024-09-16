@@ -19,7 +19,7 @@ else
 fi
 
 # Check if SERIAL_PORT is set to auto or specified
-SERIAL_PORT=$(find_ttyUSB driver.db-serial-port "0403" "6015")
+SERIAL_PORT=$(find_usb_device "ttyUSB" driver.db-serial-port "0403" "6015")
 if [ $? -ne 0 ]; then
   log_and_echo "Failed to find the serial port."
   exit 1

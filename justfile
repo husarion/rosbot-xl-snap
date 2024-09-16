@@ -142,8 +142,8 @@ teleop:
     # export FASTRTPS_DEFAULT_PROFILES_FILE=$(pwd)/shm-only.xml
     ros2 run teleop_twist_keyboard teleop_twist_keyboard # --ros-args -r __ns:=/robot
 
-iterate:
-    #!/bin/bash -e
+iterate target="jazzy":
+    #!/bin/bash
     start_time=$(date +%s)
     
     echo "Starting script..."
@@ -152,13 +152,31 @@ iterate:
     sudo rm -rf squashfs-root/
     sudo rm -rf rosbot-xl*.snap
     export SNAPCRAFT_ENABLE_EXPERIMENTAL_EXTENSIONS=1
-    snapcraft clean
+    
+    if [ {{target}} == "humble" ]; then
+        export ROS_DISTRO=humble
+    elif [ {{target}} == "jazzy" ]; then
+        export ROS_DISTRO=jazzy
+    else
+        echo "Unknown target: {{target}}"
+        exit 1
+    fi
+
+    if [ -f snap/snapcraft.yaml ]; then
+        snapcraft clean
+        sudo rm -rf snap/snapcraft.yaml
+    fi
+    
+    ./render_template.py ./snapcraft_template.yaml.jinja2 snap/snapcraft.yaml
+    chmod 444 snap/snapcraft.yaml
     snapcraft
     unsquashfs rosbot-xl*.snap
     sudo snap try squashfs-root/
     sudo snap connect rosbot-xl:raw-usb
     sudo snap connect rosbot-xl:shm-plug rosbot-xl:shm-slot
     sudo snap connect rosbot-xl:shutdown
+    sudo snap connect rosbot-xl:hardware-observe
+    sudo snap connect rosbot-xl:joystick
 
     end_time=$(date +%s)
     duration=$(( end_time - start_time ))
@@ -173,3 +191,15 @@ remove-logs:
     #!/bin/bash
     sudo rm -rf /var/log/journal/*
     sudo systemctl restart systemd-journald
+
+prepare-store-credentials:
+    #!/bin/bash
+    snapcraft export-login --snaps=rosbot-xl \
+      --acls package_access,package_push,package_update,package_release \
+      exported.txt
+
+publish:
+    #!/bin/bash
+    export SNAPCRAFT_STORE_CREDENTIALS=$(cat exported.txt)
+    snapcraft login
+    snapcraft upload --release edge rosbot-xl*.snap

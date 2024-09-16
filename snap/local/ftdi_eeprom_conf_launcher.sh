@@ -8,4 +8,6 @@ if [ "$(id -u)" -ne 0 ]; then
     exit 1
 fi
 
+export PYTHONPATH=$SNAP/usr/lib/python3/dist-packages
+
 $SNAP/usr/bin/ftdi_eeprom_conf.py
