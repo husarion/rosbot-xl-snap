@@ -201,6 +201,9 @@ apps:
   stop:
     command: usr/bin/stop_launcher.sh
 
+  restart:
+    command: usr/bin/restart_launcher.sh
+
   reset-stm32:
     command: usr/bin/reset_stm32_launcher.sh
     plugs: [raw-usb, network-bind]
@@ -326,6 +329,7 @@ parts:
     stage:
       - "-usr/bin/start_launcher.sh"
       - "-usr/bin/stop_launcher.sh"
+      - "-usr/bin/restart_launcher.sh"
 
   local-files:
     plugin: dump
@@ -335,5 +339,3 @@ parts:
       '*.py': usr/bin/
       '*.yaml': usr/share/rosbot-xl/config/
       '*.xml': usr/share/rosbot-xl/config/
-      '*.json': usr/share/rosbot-xl/config/
-      'Caddyfile': usr/share/rosbot-xl/config/
