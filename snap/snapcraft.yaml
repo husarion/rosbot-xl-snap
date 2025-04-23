@@ -11,7 +11,7 @@ description: |
   To install this snap on the Single Board Computer (SBC) within the ROSbot XL chassis, follow these steps:
 
   1. Connect the SBC to the Digital Board inside ROSbot XL using an Ethernet cable.
-  2. Configure the Ethernet Interface with the static IP address `192.168.77.2` (port `8888` on this IP is used by the firmware).
+  2. Configure the Ethernet Interface with the static IP address `192.168.77.2`.
   3. Run the following command to install the snap:
 
      snap install rosbot-xl
@@ -24,6 +24,8 @@ description: |
   * `driver`: `{...}`
   * `ros`: `{...}`
   * `webui`: `{...}`
+
+  The `configuration` key can be set to `basic` or `manipulation` (for ROSbot XL with OpenManipulator-X).
 
   The `ros` contains the following keys:
 
@@ -76,7 +78,7 @@ description: |
 
      # Mirror the setup for other ROS 2 snaps
      sudo snap set husarion-depthai $(cat /var/snap/rosbot-xl/common/ros_snap_args)
-     sudo snap set husarion-rplidar $(cat /var/snap/rosbot-xl/common/ros_snap_args)
+     ...
 
      # Set up the current shell with the same configurations
      source /var/snap/rosbot-xl/common/ros.env
@@ -127,14 +129,18 @@ plugs:
 
 apps:
 
-  daemon:
+  rosbot-xl: &rosbot-xl
     command: usr/bin/launcher.sh
+    command-chain: [usr/bin/check_daemon_running.sh, usr/bin/ros_setup.sh]
+    plugs: [network, network-bind, shm-plug, raw-usb, hardware-observe]
+    slots: [shm-slot]
+    extensions: [ros2-humble-ros-base]
+
+  daemon:
+    <<: *rosbot-xl
     command-chain: [usr/bin/ros_setup.sh]
     daemon: simple
     install-mode: enable
-    plugs: [network, network-bind, shm-plug, raw-usb]
-    slots: [shm-slot]
-    extensions: [ros2-humble-ros-base]
 
   db-server:
     command: usr/bin/db_server_launcher.sh
@@ -142,16 +148,9 @@ apps:
     install-mode: enable
     plugs: [network, network-bind, shutdown]
 
-  rosbot-xl:
-    command: usr/bin/launcher.sh
-    command-chain: [usr/bin/check_daemon_running.sh, usr/bin/ros_setup.sh]
-    plugs: [network, network-bind, shm-plug, raw-usb]
-    slots: [shm-slot]
-    extensions: [ros2-humble-ros-base]
-
   flash:
     command: usr/bin/flash_launcher.sh
-    plugs: [raw-usb, network-bind]
+    plugs: [raw-usb, network-bind, hardware-observe]
     extensions: [ros2-humble-ros-base]
 
   teleop:
@@ -198,6 +197,9 @@ apps:
 
   stop:
     command: usr/bin/stop_launcher.sh
+
+  restart:
+    command: usr/bin/restart_launcher.sh
 
   reset-stm32:
     command: usr/bin/reset_stm32_launcher.sh
@@ -309,6 +311,11 @@ parts:
       - YQ_VERSION: "v4.35.1"
     build-packages:
       - curl
+    # stage-packages:
+    # for  udevadm info /dev/ttyUSB0 (to list details of the serial port)
+    #  - udev
+    # for v4l2-ctl --list-devices (to list cameras)
+    #  - v4l-utils
     organize:
       'local-ros/*.sh': usr/bin/
       'local-ros/*.xml': usr/share/husarion-snap-common/config/
@@ -324,6 +331,7 @@ parts:
     stage:
       - "-usr/bin/start_launcher.sh"
       - "-usr/bin/stop_launcher.sh"
+      - "-usr/bin/restart_launcher.sh"
 
   local-files:
     plugin: dump
@@ -333,5 +341,3 @@ parts:
       '*.py': usr/bin/
       '*.yaml': usr/share/rosbot-xl/config/
       '*.xml': usr/share/rosbot-xl/config/
-      '*.json': usr/share/rosbot-xl/config/
-      'Caddyfile': usr/share/rosbot-xl/config/

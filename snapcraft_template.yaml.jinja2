@@ -129,14 +129,18 @@ plugs:
 
 apps:
 
-  daemon:
+  rosbot-xl: &rosbot-xl
     command: usr/bin/launcher.sh
+    command-chain: [usr/bin/check_daemon_running.sh, usr/bin/ros_setup.sh]
+    plugs: [network, network-bind, shm-plug, raw-usb, hardware-observe]
+    slots: [shm-slot]
+    extensions: [ros2-{{ ros_distro }}-ros-base]
+
+  daemon:
+    <<: *rosbot-xl
     command-chain: [usr/bin/ros_setup.sh]
     daemon: simple
     install-mode: enable
-    plugs: [network, network-bind, shm-plug, raw-usb]
-    slots: [shm-slot]
-    extensions: [ros2-{{ ros_distro }}-ros-base]
 
   db-server:
     command: usr/bin/db_server_launcher.sh
@@ -144,16 +148,9 @@ apps:
     install-mode: enable
     plugs: [network, network-bind, shutdown]
 
-  rosbot-xl:
-    command: usr/bin/launcher.sh
-    command-chain: [usr/bin/check_daemon_running.sh, usr/bin/ros_setup.sh]
-    plugs: [network, network-bind, shm-plug, raw-usb]
-    slots: [shm-slot]
-    extensions: [ros2-{{ ros_distro }}-ros-base]
-
   flash:
     command: usr/bin/flash_launcher.sh
-    plugs: [raw-usb, network-bind]
+    plugs: [raw-usb, network-bind, hardware-observe]
     extensions: [ros2-{{ ros_distro }}-ros-base]
 
   teleop:
@@ -314,6 +311,11 @@ parts:
       - YQ_VERSION: "v4.35.1"
     build-packages:
       - curl
+    # stage-packages:
+    # for  udevadm info /dev/ttyUSB0 (to list details of the serial port)
+    #  - udev
+    # for v4l2-ctl --list-devices (to list cameras)
+    #  - v4l-utils
     organize:
       'local-ros/*.sh': usr/bin/
       'local-ros/*.xml': usr/share/husarion-snap-common/config/

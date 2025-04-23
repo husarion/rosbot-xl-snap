@@ -142,7 +142,7 @@ teleop:
     # export FASTRTPS_DEFAULT_PROFILES_FILE=$(pwd)/shm-only.xml
     ros2 run teleop_twist_keyboard teleop_twist_keyboard # --ros-args -r __ns:=/robot
 
-iterate target="jazzy":
+iterate target="humble":
     #!/bin/bash
     start_time=$(date +%s)
     
@@ -163,7 +163,7 @@ iterate target="jazzy":
     fi
 
     if [ -f snap/snapcraft.yaml ]; then
-        snapcraft clean
+        # snapcraft clean
         sudo rm -rf snap/snapcraft.yaml
     fi
     
@@ -172,11 +172,7 @@ iterate target="jazzy":
     snapcraft
     unsquashfs rosbot-xl*.snap
     sudo snap try squashfs-root/
-    sudo snap connect rosbot-xl:raw-usb
-    sudo snap connect rosbot-xl:shm-plug rosbot-xl:shm-slot
-    sudo snap connect rosbot-xl:shutdown
-    sudo snap connect rosbot-xl:hardware-observe
-    sudo snap connect rosbot-xl:joystick
+    sudo /var/snap/rosbot-xl/common/post_install.sh
 
     end_time=$(date +%s)
     duration=$(( end_time - start_time ))
